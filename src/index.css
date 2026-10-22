@@ -1,45 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body { 
-    @apply bg-[#fafafa] text-[#18181b] overflow-x-hidden; 
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .font-serif-editorial {
+    font-family: 'Instrument Serif', Georgia, serif;
+  }
+
+  .font-display {
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 
-/* Staggered Reveal Elements */
+/* Choreographed Blur-to-Clear Aesthetic Entrance */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  filter: blur(8px);
+  transform: translateY(24px) scale(0.99);
+  transition:
+    opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, filter, transform;
 }
-.reveal.active { 
-  opacity: 1; 
-  transform: translateY(0); 
+
+.reveal.active {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0) scale(1);
 }
 
-.delay-100 { transition-delay: 100ms; }
-.delay-200 { transition-delay: 200ms; }
-.delay-300 { transition-delay: 300ms; }
+.delay-100 { transition-delay: 80ms; }
+.delay-200 { transition-delay: 160ms; }
+.delay-300 { transition-delay: 240ms; }
 
-/* Clean Link Underlines */
-.hover-underline { position: relative; }
-.hover-underline::after {
-  content: '';
-  position: absolute;
-  width: 0; height: 2px;
-  bottom: -2px; left: 0;
-  background-color: #18181b;
-  transition: width 0.3s ease;
+/* Gentle floating ambient animation */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.5deg); }
 }
-.hover-underline:hover::after { width: 100%; }
 
-.project-card:hover .project-image { transform: scale(1.03); }
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #fafafa; }
-::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+/* Soft custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 113, 108, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 113, 108, 0.45);
+}
+
+/* Clean print layout for CV export */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body, html {
+    background: #ffffff !important;
+    color: #1c1917 !important;
+  }
+}
