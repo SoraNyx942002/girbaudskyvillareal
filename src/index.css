@@ -21,39 +21,87 @@
   }
 }
 
-/* Choreographed Blur-to-Clear Aesthetic Entrance */
+/* Choreographed Blur-to-Clear Entrance */
 .reveal {
   opacity: 0;
-  filter: blur(8px);
-  transform: translateY(24px) scale(0.99);
+  filter: blur(6px);
+  transform: translateY(20px);
   transition:
-    opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, filter, transform;
 }
 
 .reveal.active {
   opacity: 1;
   filter: blur(0px);
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
-.delay-100 { transition-delay: 80ms; }
-.delay-200 { transition-delay: 160ms; }
-.delay-300 { transition-delay: 240ms; }
-
-/* Gentle floating ambient animation */
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(0.5deg); }
+/* Smooth CSS Grid Accordion Physics */
+.accordion-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.animate-float-slow {
-  animation: float-slow 7s ease-in-out infinite;
+.accordion-grid.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
 }
 
-/* Soft custom scrollbar */
+.accordion-inner {
+  overflow: hidden;
+}
+
+/* Calm, Slow Ambient Background Objects */
+@keyframes calm-drift-1 {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate3d(45px, -35px, 0) scale(1.06) rotate(4deg);
+  }
+  66% {
+    transform: translate3d(-30px, 25px, 0) scale(0.96) rotate(-3deg);
+  }
+}
+
+@keyframes calm-drift-2 {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-55px, 40px, 0) scale(1.08) rotate(-6deg);
+  }
+}
+
+@keyframes calm-orbit {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(30px, -45px, 0) rotate(12deg);
+  }
+}
+
+.animate-calm-1 {
+  animation: calm-drift-1 28s ease-in-out infinite;
+}
+
+.animate-calm-2 {
+  animation: calm-drift-2 34s ease-in-out infinite;
+}
+
+.animate-calm-orbit {
+  animation: calm-orbit 38s ease-in-out infinite;
+}
+
+/* Soft Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -66,15 +114,4 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(120, 113, 108, 0.45);
-}
-
-/* Clean print layout for CV export */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  body, html {
-    background: #ffffff !important;
-    color: #1c1917 !important;
-  }
 }
