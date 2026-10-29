@@ -19,6 +19,15 @@
   }
 }
 
+/* Hide scrollbars on horizontal carousels & single-line filter pills */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Choreographed Blur-to-Clear Entrance */
 .reveal {
   opacity: 0;
@@ -87,7 +96,7 @@
 .animate-plain-ring-2 { animation: plain-ring-3d-2 22s linear infinite; transform-style: preserve-3d; }
 .animate-star-twinkle { animation: star-twinkle 6s ease-in-out infinite; }
 
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(120, 113, 108, 0.25); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(120, 113, 108, 0.45); }
