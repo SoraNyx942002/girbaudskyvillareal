@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import phasedImage from './assets/phased.png';
 
-/* Automatically discover any images placed in src/ or src/assets/ */
+/* Automatically discover any images placed inside src/ or src/assets/ */
 const BUNDLED_ASSETS = import.meta.glob(
   './**/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}',
   { eager: true, import: 'default' }
@@ -10,11 +10,33 @@ const BUNDLED_ASSETS = import.meta.glob(
 function findBundledImage(keyword) {
   const lowerKey = keyword.toLowerCase();
   for (const [path, url] of Object.entries(BUNDLED_ASSETS)) {
-    if (path.toLowerCase().includes(lowerKey)) {
+    const fileName = path.split('/').pop()?.toLowerCase() || '';
+    if (fileName.startsWith(lowerKey) || fileName.includes(lowerKey)) {
       return url;
     }
   }
   return null;
+}
+
+function buildImageCandidates(baseUrl, exactBaseName, searchKeyword) {
+  const bundled = findBundledImage(searchKeyword || exactBaseName);
+  const lower = exactBaseName.toLowerCase();
+  const upper = exactBaseName.toUpperCase();
+  return [
+    bundled,
+    `${baseUrl}${exactBaseName}.png`,
+    `${baseUrl}${exactBaseName}.jpg`,
+    `${baseUrl}${exactBaseName}.jpeg`,
+    `${baseUrl}${lower}.png`,
+    `${baseUrl}${lower}.jpg`,
+    `${baseUrl}${lower}.jpeg`,
+    `${baseUrl}${upper}.PNG`,
+    `${baseUrl}${upper}.JPG`,
+    `${baseUrl}assets/${exactBaseName}.png`,
+    `${baseUrl}assets/${exactBaseName}.jpg`,
+    `${baseUrl}assets/${lower}.png`,
+    `${baseUrl}assets/${lower}.jpg`,
+  ].filter(Boolean);
 }
 
 const NOSTALGIC_STARS = [
@@ -35,7 +57,7 @@ const NOSTALGIC_STARS = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  SOFT AESTHETIC SURFACE CARD (WITH FULL-HEIGHT FLEX ALIGNMENT)             */
+/*  SOFT AESTHETIC SURFACE CARD (FULL-HEIGHT FLEX FOR BOTTOM BUTTON ALIGN)    */
 /* -------------------------------------------------------------------------- */
 function AestheticCard({ children, className = '', isDark = false }) {
   const cardRef = useRef(null);
@@ -75,7 +97,293 @@ function AestheticCard({ children, className = '', isDark = false }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  HIGH-RES BUILT-IN VISUAL CERTIFICATE REPLICA (IF IMAGE FILE IS MISSING)   */
+/*  SCROLLABLE & MAGNIFIABLE UI VIEWPORT FOR WEB & MOBILE DESIGNS             */
+/* -------------------------------------------------------------------------- */
+function ScrollableUiViewport({
+  project,
+  isDark,
+  onOpenInspector,
+}) {
+  const scrollContainerRef = useRef(null);
+  const [activeScreenIdx, setActiveScreenIdx] = useState(0);
+  const [magnifyEnabled, setMagnifyEnabled] = useState(false);
+  const [lensState, setLensState] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    bgX: 0,
+    bgY: 0,
+  });
+
+  const screens = project.screens || [
+    { label: 'Full Scrollable View', candidates: project.candidates },
+  ];
+  const currentScreen = screens[activeScreenIdx] || screens[0];
+  const validCandidates = (currentScreen?.candidates || []).filter(Boolean);
+
+  const [candidateIdx, setCandidateIdx] = useState(0);
+  const [imgFailed, setImgFailed] = useState(validCandidates.length === 0);
+
+  useEffect(() => {
+    setCandidateIdx(0);
+    setImgFailed(validCandidates.length === 0);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [activeScreenIdx, project.id, validCandidates.length]);
+
+  const activeImgUrl = !imgFailed ? validCandidates[candidateIdx] : null;
+
+  const handleImageMouseMove = (e) => {
+    if (!magnifyEnabled || !activeImgUrl) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const bgX = (x / rect.width) * 100;
+    const bgY = (y / rect.height) * 100;
+    setLensState({
+      visible: true,
+      x,
+      y,
+      bgX,
+      bgY,
+    });
+  };
+
+  const handleQuickScroll = (direction) => {
+    if (!scrollContainerRef.current) return;
+    scrollContainerRef.current.scrollBy({
+      top: direction === 'down' ? 260 : -260,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <div className="flex flex-col">
+      {/* Top Interactive Viewport Bar */}
+      <div
+        className={`px-3.5 py-2.5 rounded-t-2xl border border-b-0 flex flex-wrap items-center justify-between gap-2 ${
+          isDark ? 'bg-[#141311] border-[#2E2C29]' : 'bg-[#F3F1EC] border-[#E5E2DC]'
+        }`}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80 shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80 shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80 shrink-0" />
+          <span className="ml-1.5 text-[11px] font-medium truncate opacity-75">
+            {project.viewportLabel}
+          </span>
+        </div>
+
+        {/* Controls: Magnifier Toggle + Scroll Helpers */}
+        <div className="flex items-center gap-1.5">
+          {project.id !== 'caiantrix-ui' && (
+            <button
+              type="button"
+              onClick={() => setMagnifyEnabled((prev) => !prev)}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all flex items-center gap-1 ${
+                magnifyEnabled
+                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
+                  : isDark
+                  ? 'bg-[#242220] text-[#E7E5E0] border-[#35322F] hover:bg-[#2E2C29]'
+                  : 'bg-white text-[#44403C] border-[#E5E2DC] hover:bg-stone-100'
+              }`}
+              title="Toggle 2.2x Hover Magnifying Lens"
+            >
+              <span>🔍</span>
+              <span>{magnifyEnabled ? 'Magnifier ON' : 'Magnify'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => handleQuickScroll('up')}
+            className={`w-6 h-6 rounded-full border text-[10px] flex items-center justify-center transition-colors ${
+              isDark
+                ? 'bg-[#242220] border-[#35322F] hover:bg-[#2E2C29]'
+                : 'bg-white border-[#E5E2DC] hover:bg-stone-100'
+            }`}
+            title="Scroll Up"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickScroll('down')}
+            className={`w-6 h-6 rounded-full border text-[10px] flex items-center justify-center transition-colors ${
+              isDark
+                ? 'bg-[#242220] border-[#35322F] hover:bg-[#2E2C29]'
+                : 'bg-white border-[#E5E2DC] hover:bg-stone-100'
+            }`}
+            title="Scroll Down"
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+
+      {/* Multi-Screen Switcher Bar (Used for Zenara 3-Screen Mobile Suite) */}
+      {screens.length > 1 && (
+        <div
+          className={`px-3 py-2 border-x flex flex-wrap items-center gap-1.5 ${
+            isDark ? 'bg-[#181715] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E5E2DC]'
+          }`}
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60 mr-1">
+            Screens:
+          </span>
+          {screens.map((scr, idx) => (
+            <button
+              key={scr.label}
+              type="button"
+              onClick={() => setActiveScreenIdx(idx)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
+                activeScreenIdx === idx
+                  ? isDark
+                    ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
+                    : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+            >
+              {scr.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Scrollable Viewport Window (Supports Long Full-Page Web Designs) */}
+      <div
+        ref={scrollContainerRef}
+        className={`relative w-full h-[360px] sm:h-[400px] overflow-y-auto overflow-x-hidden rounded-b-2xl border transition-all ${
+          isDark ? 'bg-[#0F0E0D] border-[#2E2C29]' : 'bg-[#F5F2EC] border-[#E5E2DC]'
+        }`}
+      >
+        {project.id === 'caiantrix-ui' ? (
+          /* Interactive Scrollable System UI Preview for Caiantrix Grocery POS */
+          <div className="p-4 sm:p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-500/20 pb-3">
+              <div>
+                <div className="text-xs font-display font-bold">CAIANTRIX GROCERY POS & INVENTORY v2.4</div>
+                <div className="text-[10px] opacity-65">Daily Store Operations & Real-Time SKU Tracking</div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                ● Live Terminal
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                <div className="text-[10px] opacity-60">Active SKUs</div>
+                <div className="font-display font-bold text-base mt-0.5">2,840</div>
+                <div className="text-[10px] text-emerald-500 mt-0.5">100% Indexed</div>
+              </div>
+              <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                <div className="text-[10px] opacity-60">Checkout Speed</div>
+                <div className="font-display font-bold text-base mt-0.5">-35% Time</div>
+                <div className="text-[10px] text-emerald-500 mt-0.5">Low-Friction UI</div>
+              </div>
+              <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                <div className="text-[10px] opacity-60">Stock Accuracy</div>
+                <div className="font-display font-bold text-base mt-0.5">99.4%</div>
+                <div className="text-[10px] text-emerald-500 mt-0.5">Auto-Audit</div>
+              </div>
+            </div>
+
+            <div className={`p-3.5 rounded-xl border space-y-2.5 ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span>Quick Barcode & Category Filter</span>
+                <span className="text-[10px] opacity-60">Produce • Pantry • Dairy • Beverages</span>
+              </div>
+              <div className="space-y-1.5 text-[11px]">
+                {[
+                  { item: 'Fresh Farm Milk 1L', code: 'SKU-1042', stock: '48 in stock', price: '₱115.00' },
+                  { item: 'Whole Wheat Loaf', code: 'SKU-2089', stock: '22 in stock', price: '₱78.00' },
+                  { item: 'Organic Brown Rice 5kg', code: 'SKU-3190', stock: '16 in stock', price: '₱340.00' },
+                  { item: 'Arabica Ground Coffee', code: 'SKU-4011', stock: '31 in stock', price: '₱265.00' },
+                ].map((row) => (
+                  <div
+                    key={row.code}
+                    className={`flex items-center justify-between p-2 rounded-lg border ${
+                      isDark ? 'bg-[#121110] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-semibold">{row.item}</div>
+                      <div className="text-[10px] opacity-60">{row.code} • {row.stock}</div>
+                    </div>
+                    <span className="font-display font-bold">{row.price}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : activeImgUrl ? (
+          <div
+            onMouseMove={handleImageMouseMove}
+            onMouseLeave={() => setLensState((prev) => ({ ...prev, visible: false }))}
+            onClick={() => onOpenInspector(project, activeScreenIdx)}
+            className={`relative w-full mx-auto ${
+              project.isMobile ? 'max-w-[270px] py-4' : 'w-full'
+            } ${magnifyEnabled ? 'cursor-crosshair' : 'cursor-zoom-in'}`}
+          >
+            <img
+              src={activeImgUrl}
+              alt={`${project.title} - ${currentScreen.label}`}
+              onError={() => {
+                if (candidateIdx + 1 < validCandidates.length) {
+                  setCandidateIdx(candidateIdx + 1);
+                } else {
+                  setImgFailed(true);
+                }
+              }}
+              className={`w-full h-auto block select-none ${
+                project.isMobile ? 'rounded-2xl shadow-xl mx-auto' : ''
+              }`}
+            />
+
+            {/* Interactive 2.2x Magnifying Glass Lens */}
+            {magnifyEnabled && lensState.visible && (
+              <div
+                className="pointer-events-none absolute w-40 h-40 rounded-full border-2 border-white shadow-[0_10px_35px_rgba(0,0,0,0.65)] z-30"
+                style={{
+                  left: `${lensState.x - 80}px`,
+                  top: `${lensState.y - 80}px`,
+                  backgroundImage: `url(${activeImgUrl})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '240%',
+                  backgroundPosition: `${lensState.bgX}% ${lensState.bgY}%`,
+                }}
+              />
+            )}
+          </div>
+        ) : (
+          /* Clean Visual Preview Fallback if Image File is Not Yet in public/ or src/assets/ */
+          <div className="p-6 text-center h-full flex flex-col items-center justify-center space-y-3">
+            <div className="px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30">
+              {project.fileHint}
+            </div>
+            <div className="font-display font-bold text-base">{project.title}</div>
+            <p className="text-xs opacity-75 max-w-xs leading-relaxed">
+              Place <strong>{project.fileHint}</strong> inside your <code>public/</code> or <code>src/assets/</code> folder to enable full vertical scrolling and magnification.
+            </p>
+          </div>
+        )}
+
+        {/* Floating Scroll Hint Pill */}
+        {project.isTallWeb && (
+          <div className="sticky bottom-2.5 left-0 right-0 flex justify-center pointer-events-none">
+            <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] font-medium shadow-md">
+              ↕ Scroll inside frame or click to magnify full page
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  HIGH-RES BUILT-IN VISUAL CERTIFICATE REPLICA (IF CERT FILE IS MISSING)    */
 /* -------------------------------------------------------------------------- */
 function BuiltInCertificateDocument({ certId }) {
   if (certId === 'tesda-ncii') {
@@ -212,9 +520,6 @@ function BuiltInCertificateDocument({ certId }) {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*  MULTI-PATH SMART CERTIFICATE IMAGE LOADER                                 */
-/* -------------------------------------------------------------------------- */
 function SmartCertImage({ candidates = [], certId, alt, className = '' }) {
   const validCandidates = candidates.filter(Boolean);
   const [idx, setIdx] = useState(0);
@@ -260,15 +565,7 @@ export default function App() {
   });
 
   const baseUrl = import.meta.env.BASE_URL;
-  const bundledProfile = findBundledImage('profile');
-  const portraitCandidates = [
-    bundledProfile,
-    `${baseUrl}profile.jpg`,
-    `${baseUrl}profile.png`,
-    `${baseUrl}profile.jpeg`,
-    `${baseUrl}PROFILE.jpg`,
-    `${baseUrl}PROFILE.png`,
-  ].filter(Boolean);
+  const portraitCandidates = buildImageCandidates(baseUrl, 'profile', 'profile');
   const [portraitIdx, setPortraitIdx] = useState(0);
   const [photoError, setPhotoError] = useState(false);
 
@@ -290,28 +587,139 @@ export default function App() {
   const [openProcessIdx, setOpenProcessIdx] = useState(0);
   const [openExpIds, setOpenExpIds] = useState(['villman', 'undecide']);
   const [phasedView, setPhasedView] = useState('live');
+  const [uiCategoryFilter, setUiCategoryFilter] = useState('all');
+
+  /* Fullscreen Scroll & Zoom Inspector Modal State */
+  const [inspectorModal, setInspectorModal] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  /* Universal Lightbox State for Certificates */
   const [lightboxData, setLightboxData] = useState(null);
+
   const [cvFilter, setCvFilter] = useState('all');
   const [selectedSkill, setSelectedSkill] = useState(null);
 
-  /* Helper that builds candidate URLs from both src/assets/ and public/ */
-  const buildCertCandidates = (baseName, keyword) => {
-    const bundled = findBundledImage(keyword);
-    const lower = baseName.toLowerCase();
-    const upper = baseName.toUpperCase();
-    return [
-      bundled,
-      `${baseUrl}${baseName}.png`,
-      `${baseUrl}${baseName}.jpg`,
-      `${baseUrl}${baseName}.jpeg`,
-      `${baseUrl}${lower}.png`,
-      `${baseUrl}${lower}.jpg`,
-      `${baseUrl}${upper}.PNG`,
-      `${baseUrl}${upper}.JPG`,
-      `${baseUrl}assets/${baseName}.png`,
-      `${baseUrl}assets/${baseName}.jpg`,
-    ].filter(Boolean);
-  };
+  /* ------------------------------------------------------------------------ */
+  /*  UI DESIGN WORKS DATA (SCROLLABLE & MAGNIFIABLE GALLERY)                 */
+  /* ------------------------------------------------------------------------ */
+  const uiDesignWorks = [
+    {
+      id: 'casa-amelinda',
+      title: 'Casa Amelinda Resort',
+      subtitle: 'Hospitality & Resort Booking Web UI',
+      category: 'web',
+      badge: 'Full-Page Web UI',
+      fileHint: 'CAR.png',
+      viewportLabel: 'casa-amelinda-resort.ui • Scrollable Web Page',
+      isTallWeb: true,
+      isMobile: false,
+      candidates: buildImageCandidates(baseUrl, 'CAR', 'car'),
+      description:
+        'Designed a vibrant, welcoming full-page resort interface ("Be Our Guest, Feel Your Best") for Casa Amelinda Resort in Brgy. Butas Na Bato, Dingalan, Aurora. Features a clear hero booking callout, categorized event packages (Wedding, Reunion, Birthday, Seminar, Meeting), a 6-card Popular Rooms gallery (Mini Bar, En Suite Tub, Dining Room, Elegant Kitchen, Family Pool, Living Room), and a verified guest review spotlight.',
+      highlights: [
+        'Structured vertical visual hierarchy guiding guests from hero discovery to room selection and instant booking.',
+        'High-contrast gold action buttons paired with coastal azure surfaces for effortless readability.',
+      ],
+      tags: ['Figma Web UI', 'Hospitality UX', 'Booking Flow', 'Responsive Layout'],
+    },
+    {
+      id: 'heartful-haven-orphanage',
+      title: 'Heartful Haven — Orphanage UI',
+      subtitle: 'Non-Profit & Community Sanctuary Web UI',
+      category: 'web',
+      badge: 'Long-Scroll Web UI',
+      fileHint: 'ORPHANAGE.png',
+      viewportLabel: 'heartful-haven-orphanage.org • Scrollable Web Page',
+      isTallWeb: true,
+      isMobile: false,
+      candidates: buildImageCandidates(baseUrl, 'ORPHANAGE', 'orphanage'),
+      description:
+        'Crafted an empathetic, story-driven web platform ("Where Every Child Belongs, and Every Heart is Home — Fostering Hope, Creating Homes") for Heartful Haven Orphanage. Designed to build donor trust and inspire community volunteering through warm earthy tones and structured storytelling.',
+      highlights: [
+        'Dedicated split-grid sections for "Our Mission" and "Our Vision" paired with authentic photography.',
+        'Interactive "Meet the Santos family!" testimony carousel and video-backed volunteer onboarding cards (Event Manager, Maintenance & Renovation, Tutoring).',
+      ],
+      tags: ['Non-Profit Web UI', 'Visual Storytelling', 'Volunteer UX', 'Figma Prototype'],
+    },
+    {
+      id: 'golden-sunset-resort',
+      title: 'Golden Sunset — Web Resort Landing Page',
+      subtitle: 'Editorial Coastal Travel & Events Landing Page UI',
+      category: 'web',
+      badge: 'Web Landing Page',
+      fileHint: 'webuibrown.png',
+      viewportLabel: 'golden-sunset-resort.ph • Scrollable Web Page',
+      isTallWeb: true,
+      isMobile: false,
+      candidates: buildImageCandidates(baseUrl, 'webuibrown', 'webuibrown'),
+      description:
+        'Designed an earth-toned, editorial resort landing page ("Sunsets: nature’s daily masterpiece.") for Golden Sunset Beach Resorts in Cabangan, Zambales. Balances warm olive-gold tones with clean white space to highlight coastal experiences and event packages.',
+      highlights: [
+        'Icon-driven Events bar (Wedding, Birthday, Reunion, Team Building, Seminar) for rapid user navigation.',
+        'Curated "Popular Scenery" rating cards (Bonfire, Swing, and Pool by the beach) leading into the "Unleash Wanderlust With Sunset" booking section.',
+      ],
+      tags: ['Landing Page UI', 'Editorial Layout', 'Color Architecture', 'Travel & Resort'],
+    },
+    {
+      id: 'zenara-mobile-ui',
+      title: 'Zenara — Social & Gamified Messaging UI',
+      subtitle: '3-Screen Mobile App Suite ("Connect with your happiness.")',
+      category: 'mobile',
+      badge: '3-Screen Mobile UI',
+      fileHint: 'ZENARA1.png, ZENARA2.png, ZENARA3.png',
+      viewportLabel: 'Zenara Mobile App • Switch & Scroll Screens',
+      isTallWeb: false,
+      isMobile: true,
+      screens: [
+        {
+          label: '01 / Login UI',
+          caption: 'Glassmorphic Authentication & Onboarding (ZENARA1)',
+          candidates: buildImageCandidates(baseUrl, 'ZENARA1', 'zenara1'),
+        },
+        {
+          label: '02 / Social Feed',
+          caption: 'Stories Tray & Creator Photo Feed (ZENARA2)',
+          candidates: buildImageCandidates(baseUrl, 'ZENARA2', 'zenara2'),
+        },
+        {
+          label: '03 / Messages & QuizQuest',
+          caption: 'Direct Messaging & Gamified QuizQuest Widget (ZENARA3)',
+          candidates: buildImageCandidates(baseUrl, 'ZENARA3', 'zenara3'),
+        },
+      ],
+      description:
+        'Designed a cohesive 3-screen mobile social networking and messaging application ("Connect with your happiness.") featuring a lotus brand identity, soft glassmorphic login cards, an interactive stories and creator feed, and a gamified direct messaging inbox.',
+      highlights: [
+        'Screen 1 (ZENARA1): Frosted-glass login interface over fluid magenta-violet ambient shapes.',
+        'Screen 2 & 3 (ZENARA2 & ZENARA3): Creator stories tray, high-engagement photo feed, active status thought bubbles ("Hi!", "Follow me!"), and an integrated "Play QuizQuest" social gaming bar (Lvl. 128 • Exp. 2456/3000).',
+      ],
+      tags: ['Mobile App UI', 'Glassmorphism', 'Social & Messaging UX', 'Gamification'],
+    },
+    {
+      id: 'caiantrix-ui',
+      title: 'Caiantrix Grocery System',
+      subtitle: 'Retail Point-of-Sale & Inventory Management UI',
+      category: 'system',
+      badge: 'System & POS UI',
+      fileHint: 'Interactive System Preview',
+      viewportLabel: 'caiantrix-pos-system.local • Interactive Preview',
+      isTallWeb: false,
+      isMobile: false,
+      candidates: [],
+      description:
+        'Redesigned the operational user interface for a retail grocery management system to streamline daily cashier checkout workflows, reduce item lookup friction, and improve real-time SKU inventory tracking.',
+      highlights: [
+        'High-contrast dashboard metrics for active SKUs, stock sync accuracy, and rapid category filtering.',
+        'Structured for fast keyboard and touch interaction during peak store hours.',
+      ],
+      tags: ['System UI', 'Operations UX', 'POS Interface', 'Inventory Dashboard'],
+    },
+  ];
+
+  const filteredUiWorks =
+    uiCategoryFilter === 'all'
+      ? uiDesignWorks
+      : uiDesignWorks.filter((w) => w.category === uiCategoryFilter);
 
   /* Official Certifications Data */
   const certifications = [
@@ -322,7 +730,7 @@ export default function App() {
       date: 'Issued Oct 22, 2026 • Valid until Oct 21, 2031',
       credentialId: 'Cert No. 26131402035012',
       badge: 'National Certificate II',
-      candidates: buildCertCandidates('TESDANCII', 'tesda'),
+      candidates: buildImageCandidates(baseUrl, 'TESDANCII', 'tesda'),
       description:
         'Certified in installing and configuring computer systems, setting up computer networks and servers, and maintaining and repairing enterprise computer systems and networks.',
       tags: ['Computer Systems', 'Computer Networks', 'Server Setup', 'System Maintenance'],
@@ -334,7 +742,7 @@ export default function App() {
       date: 'Completed Jan 31, 2026',
       credentialId: 'Instructor: John Philip Tan',
       badge: 'Cisco Verified',
-      candidates: buildCertCandidates('CISCOCERT', 'cisco'),
+      candidates: buildImageCandidates(baseUrl, 'CISCOCERT', 'cisco'),
       description:
         'Successfully completed training in data science principles, analytics workflows, and modern data-driven decision systems.',
       tags: ['Data Science', 'Analytics', 'Cisco NetAcad', 'DICT-ITU'],
@@ -346,7 +754,7 @@ export default function App() {
       date: 'Given Feb 5, 2026',
       credentialId: 'ISSOC Webinar Series',
       badge: 'AI Literacy',
-      candidates: buildCertCandidates('NCBA', 'ncba'),
+      candidates: buildImageCandidates(baseUrl, 'NCBA', 'ncba'),
       description:
         'Recognized for active participation in essential AI literacy skills, ethical usage, and responsible exploration of AI in education and digital innovation.',
       tags: ['AI Literacy', 'Responsible AI', 'Digital Innovation'],
@@ -445,6 +853,7 @@ export default function App() {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setLightboxData(null);
+        setInspectorModal(null);
         setIsMobileMenuOpen(false);
       }
     };
@@ -478,7 +887,16 @@ export default function App() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['about', 'process', 'work', 'experience', 'certifications', 'capabilities', 'ratings'];
+      const sections = [
+        'about',
+        'process',
+        'work',
+        'ui-works',
+        'experience',
+        'certifications',
+        'capabilities',
+        'ratings',
+      ];
       for (const id of sections) {
         const el = document.getElementById(id);
         if (el) {
@@ -504,6 +922,14 @@ export default function App() {
     navigator.clipboard.writeText(text);
     setCopiedLabel(label);
     setTimeout(() => setCopiedLabel(''), 2500);
+  };
+
+  const handleOpenUiInspector = (project, initialScreenIdx = 0) => {
+    setZoomLevel(1);
+    setInspectorModal({
+      project,
+      screenIdx: initialScreenIdx,
+    });
   };
 
   const handleAddSuggestedPhrase = (phrase) => {
@@ -777,7 +1203,8 @@ export default function App() {
             {[
               { id: 'about', label: 'About' },
               { id: 'process', label: 'Process' },
-              { id: 'work', label: 'Work' },
+              { id: 'work', label: 'PHASED' },
+              { id: 'ui-works', label: 'UI Designs' },
               { id: 'experience', label: 'Resume/CV' },
               { id: 'certifications', label: 'Certificates' },
               { id: 'capabilities', label: 'Skills' },
@@ -786,7 +1213,7 @@ export default function App() {
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
+                className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${
                   activeNav === item.id
                     ? isDark
                       ? 'bg-[#F5F3EF] text-[#121110] font-semibold'
@@ -863,7 +1290,8 @@ export default function App() {
               {[
                 { id: 'about', label: 'About & Links' },
                 { id: 'process', label: 'Design Process' },
-                { id: 'work', label: 'Selected Work (PHASED)' },
+                { id: 'work', label: 'Featured System (PHASED)' },
+                { id: 'ui-works', label: 'UI Design Works Studio (5)' },
                 { id: 'experience', label: 'Experience & Resume/CV' },
                 { id: 'certifications', label: 'Verified Certifications (3)' },
                 { id: 'capabilities', label: 'Capabilities & Skills' },
@@ -1188,17 +1616,17 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECTION 3: SELECTED WORKS — PHASED LIVE PREVIEW & BORDERLESS UI */}
+        {/* SECTION 3: FLAGSHIP FULL-STACK & AI SYSTEM — PHASED */}
         <section id="work" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b pb-4 ${borderLine}`}>
             <div>
               <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-                02 / Selected Works
+                02 / Flagship Engineering & UI Case Study
               </span>
               <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
                 Featured{' '}
                 <span className="font-serif-editorial italic font-normal text-3xl sm:text-5xl">
-                  case studies
+                  application
                 </span>
               </h2>
             </div>
@@ -1350,42 +1778,138 @@ export default function App() {
               </div>
             </div>
           </AestheticCard>
+        </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-            <AestheticCard isDark={isDark} className="p-6 sm:p-7">
-              <div className="flex-1">
-                <h3 className={`font-display text-xl font-bold ${textMain}`}>Caiantrix Grocery System</h3>
-                <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
-                  Redesigned the user interface for a retail grocery management system to streamline daily checkout operations and inventory tracking.
-                </p>
-              </div>
-              <div className={`flex flex-wrap gap-2 mt-5 pt-4 border-t ${borderLine}`}>
-                <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>System UI</span>
-                <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>Workflow UX</span>
-              </div>
-            </AestheticCard>
+        {/* ==================================================================== */}
+        {/*  SECTION 4: UI/UX DESIGN WORKS STUDIO (SCROLLABLE & MAGNIFIABLE)     */}
+        {/* ==================================================================== */}
+        <section id="ui-works" className="reveal space-y-8 scroll-mt-24">
+          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b pb-4 ${borderLine}`}>
+            <div>
+              <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
+                03 / Interactive Interface Gallery
+              </span>
+              <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
+                UI/UX design{' '}
+                <span className="font-serif-editorial italic font-normal text-3xl sm:text-5xl">
+                  works & prototypes
+                </span>
+              </h2>
+              <p className={`text-xs sm:text-sm mt-1.5 max-w-2xl ${textSub}`}>
+                Scroll vertically inside any web preview frame, toggle the <strong>🔍 Magnify</strong> lens to inspect pixel details, or open the fullscreen zoomable inspector.
+              </p>
+            </div>
 
-            <AestheticCard isDark={isDark} className="p-6 sm:p-7">
-              <div className="flex-1">
-                <h3 className={`font-display text-xl font-bold ${textMain}`}>Casa Amelinda Resort</h3>
-                <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
-                  Designed calm, responsive screen layouts in Figma for a clear and welcoming guest booking interface across mobile, tablet, and desktop.
-                </p>
-              </div>
-              <div className={`flex flex-wrap gap-2 mt-5 pt-4 border-t ${borderLine}`}>
-                <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>Figma Design</span>
-                <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>Hospitality UI</span>
-              </div>
-            </AestheticCard>
+            {/* Category Filter Pills */}
+            <div className={`inline-flex flex-wrap p-1 rounded-full border self-start ${pillBg}`}>
+              {[
+                { id: 'all', label: 'All UI Works (5)' },
+                { id: 'web', label: 'Web Landing Pages (3)' },
+                { id: 'mobile', label: 'Mobile App UI (1)' },
+                { id: 'system', label: 'System / POS UI (1)' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setUiCategoryFilter(tab.id)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    uiCategoryFilter === tab.id
+                      ? isDark
+                        ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
+                        : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
+                      : `${textSub} hover:${textMain}`
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* UI Design Cards Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 items-stretch">
+            {filteredUiWorks.map((project) => (
+              <AestheticCard
+                key={project.id}
+                isDark={isDark}
+                className="p-4 sm:p-6 flex flex-col justify-between"
+              >
+                <div className="flex-1 flex flex-col">
+                  {/* Scrollable + Magnifiable Viewport */}
+                  <ScrollableUiViewport
+                    project={project}
+                    isDark={isDark}
+                    onOpenInspector={handleOpenUiInspector}
+                  />
+
+                  {/* Project Description & Details */}
+                  <div className="mt-5 space-y-2.5 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`px-3 py-0.5 rounded-full text-[10px] font-semibold border ${sageBadge}`}>
+                        {project.badge}
+                      </span>
+                      <span className={`text-[11px] font-medium ${textSoft}`}>
+                        {project.subtitle}
+                      </span>
+                    </div>
+
+                    <h3 className={`font-display text-xl sm:text-2xl font-bold tracking-tight ${textMain}`}>
+                      {project.title}
+                    </h3>
+
+                    <p className={`text-xs sm:text-sm leading-relaxed ${textSub}`}>
+                      {project.description}
+                    </p>
+
+                    <ul className={`space-y-1.5 pt-1 text-xs leading-relaxed ${textSub}`}>
+                      {project.highlights.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Bottom Anchored Tags & Fullscreen Zoom Trigger */}
+                <div className={`mt-6 pt-4 border-t flex flex-col justify-end gap-3.5 ${borderLine}`}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] border ${pillBg}`}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {project.id !== 'caiantrix-ui' && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenUiInspector(project, 0)}
+                      className={`w-full py-2.5 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-2 ${
+                        isDark
+                          ? 'bg-[#F5F3EF] text-[#121110] border-[#F5F3EF] hover:bg-white'
+                          : 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] hover:bg-[#35312E]'
+                      }`}
+                    >
+                      <span>⤢ Open Fullscreen Scroll & Magnifier</span>
+                    </button>
+                  )}
+                </div>
+              </AestheticCard>
+            ))}
           </div>
         </section>
 
-        {/* SECTION 4: INTERACTIVE RESUME/CV WITH SMOOTH ACCORDIONS */}
+        {/* SECTION 5: INTERACTIVE RESUME/CV WITH SMOOTH ACCORDIONS */}
         <section id="experience" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-4 ${borderLine}`}>
             <div>
               <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-                03 / Resume/CV
+                04 / Resume/CV
               </span>
               <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
                 Experience &{' '}
@@ -1606,14 +2130,12 @@ export default function App() {
           )}
         </section>
 
-        {/* ==================================================================== */}
-        {/*  SECTION 5: VERIFIED CERTIFICATIONS GALLERY (ALIGNED BOTTOM BUTTONS) */}
-        {/* ==================================================================== */}
+        {/* SECTION 6: VERIFIED CERTIFICATIONS GALLERY (ALIGNED BOTTOM BUTTONS) */}
         <section id="certifications" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-4 ${borderLine}`}>
             <div>
               <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-                04 / Official Credentials & Licenses
+                05 / Official Credentials & Licenses
               </span>
               <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
                 Verified{' '}
@@ -1634,9 +2156,7 @@ export default function App() {
                 isDark={isDark}
                 className="p-4 sm:p-5 group"
               >
-                {/* Top & Middle Content (Grows to fill space so footers align) */}
                 <div className="flex-1 flex flex-col">
-                  {/* Certificate Preview Frame */}
                   <div
                     onClick={() =>
                       setLightboxData({
@@ -1665,7 +2185,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Certificate Details */}
                   <div className="mt-4 space-y-2 flex-1 flex flex-col">
                     <div className="flex items-center justify-between gap-2">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${sageBadge}`}>
@@ -1686,7 +2205,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Bottom Anchored Footer: Tags + Aligned View Full Certificate Button */}
                 <div className={`mt-6 pt-4 border-t flex flex-col justify-end gap-3.5 ${borderLine}`}>
                   <div className="flex flex-wrap gap-1.5 min-h-[52px] content-start">
                     {cert.tags.map((tag) => (
@@ -1720,11 +2238,11 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECTION 6: CAPABILITIES & TOOLKIT */}
+        {/* SECTION 7: CAPABILITIES & TOOLKIT */}
         <section id="capabilities" className="reveal space-y-6 scroll-mt-24">
           <div className={`border-b pb-4 ${borderLine}`}>
             <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-              05 / Capabilities
+              06 / Capabilities
             </span>
             <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
               Design & technical{' '}
@@ -1767,12 +2285,12 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECTION 7: PERFORMANCE RATINGS & FEEDBACK */}
+        {/* SECTION 8: PERFORMANCE RATINGS & FEEDBACK */}
         <section id="ratings" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-4 ${borderLine}`}>
             <div>
               <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-                06 / Performance & Feedback
+                07 / Performance & Feedback
               </span>
               <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
                 Rate my{' '}
@@ -1938,6 +2456,115 @@ export default function App() {
         </footer>
       </main>
 
+      {/* ---------------------------------------------------------------------- */}
+      {/*  FULLSCREEN SCROLLABLE & MAGNIFIABLE UI DESIGN INSPECTOR MODAL         */}
+      {/* ---------------------------------------------------------------------- */}
+      {inspectorModal && (
+        <div
+          onClick={() => setInspectorModal(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col p-3 sm:p-6"
+        >
+          {/* Top Inspector Toolbar */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-6xl w-full mx-auto mb-3 p-3 sm:px-5 rounded-2xl bg-[#181715] border border-white/15 text-white flex flex-wrap items-center justify-between gap-3"
+          >
+            <div className="min-w-0">
+              <div className="font-display font-bold text-sm sm:text-base truncate">
+                {inspectorModal.project.title}
+              </div>
+              <div className="text-[11px] text-zinc-400 truncate">
+                {inspectorModal.project.subtitle} • Scroll vertically & use zoom controls
+              </div>
+            </div>
+
+            {/* Screen Switcher (If Zenara Multi-Screen) */}
+            {inspectorModal.project.screens && (
+              <div className="flex items-center gap-1 bg-black/50 p-1 rounded-full border border-white/10">
+                {inspectorModal.project.screens.map((scr, idx) => (
+                  <button
+                    key={scr.label}
+                    type="button"
+                    onClick={() =>
+                      setInspectorModal((prev) => ({ ...prev, screenIdx: idx }))
+                    }
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                      inspectorModal.screenIdx === idx
+                        ? 'bg-white text-zinc-950 font-semibold'
+                        : 'text-zinc-300 hover:text-white'
+                    }`}
+                  >
+                    {scr.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Magnification Controls (100% -> 250%) */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-zinc-400 mr-1 hidden sm:inline">
+                Magnify:
+              </span>
+              {[1, 1.5, 2, 2.5].map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setZoomLevel(lvl)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                    zoomLevel === lvl
+                      ? 'bg-emerald-500 text-zinc-950 border-emerald-400'
+                      : 'bg-white/10 text-zinc-200 border-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  {lvl * 100}%
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setInspectorModal(null)}
+                className="ml-2 px-4 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200"
+              >
+                Close (Esc)
+              </button>
+            </div>
+          </div>
+
+          {/* Scrollable High-Resolution Canvas */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-6xl w-full mx-auto flex-1 overflow-auto rounded-2xl bg-[#0C0C0E] border border-white/15 p-4 sm:p-8"
+          >
+            {(() => {
+              const proj = inspectorModal.project;
+              const activeScr = proj.screens
+                ? proj.screens[inspectorModal.screenIdx]
+                : { candidates: proj.candidates, label: proj.title };
+              const cands = (activeScr?.candidates || []).filter(Boolean);
+
+              return (
+                <div
+                  className="mx-auto transition-all duration-300 origin-top"
+                  style={{
+                    width: proj.isMobile
+                      ? `${Math.min(100, 38 * zoomLevel)}%`
+                      : `${100 * zoomLevel}%`,
+                    minWidth: proj.isMobile ? '280px' : undefined,
+                  }}
+                >
+                  <SmartCertImage
+                    candidates={cands}
+                    certId={proj.id}
+                    alt={proj.title}
+                    className="w-full h-auto block rounded-xl shadow-2xl mx-auto"
+                  />
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
       {/* Universal Fullscreen Lightbox for Certificates & PHASED UI Artwork */}
       {lightboxData && (
         <div
@@ -1977,4 +2604,4 @@ export default function App() {
       )}
     </div>
   );
-} 
+}
