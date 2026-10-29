@@ -58,95 +58,82 @@
   overflow: hidden;
 }
 
-/* Calm Floating Drift for the Plain Line-Art Planets */
-@keyframes planet-float-1 {
+/* Calm Floating Drift for the Plain Circles */
+@keyframes calm-orbit-1 {
   0%, 100% {
     transform: translate3d(0px, 0px, 0);
   }
   50% {
-    transform: translate3d(32px, -26px, 0);
+    transform: translate3d(30px, -35px, 0);
   }
 }
 
-@keyframes planet-float-2 {
+@keyframes calm-orbit-2 {
   0%, 100% {
     transform: translate3d(0px, 0px, 0);
   }
   50% {
-    transform: translate3d(-36px, 28px, 0);
+    transform: translate3d(-40px, 30px, 0);
   }
 }
 
-/* 3D Ring Tilt & Gyroscopic Wobble Action */
-@keyframes ring-3d-tilt-1 {
-  0%, 100% {
-    transform: rotate(-22deg) scaleY(0.30);
-  }
-  50% {
-    transform: rotate(-12deg) scaleY(0.42);
-  }
-}
-
-@keyframes ring-3d-tilt-2 {
-  0%, 100% {
-    transform: rotate(20deg) scaleY(0.32);
-  }
-  50% {
-    transform: rotate(10deg) scaleY(0.22);
-  }
-}
-
-/* 3D Orbiting Moon & Ring Spin */
-@keyframes ring-orbit-spin {
+/* 3D Spinning & Tilting Ring Action Around the Plain Circle */
+@keyframes plain-ring-3d-1 {
   0% {
-    transform: rotate(0deg);
+    transform: rotateX(70deg) rotateY(-18deg) rotateZ(0deg);
+  }
+  50% {
+    transform: rotateX(63deg) rotateY(-10deg) rotateZ(180deg);
   }
   100% {
-    transform: rotate(360deg);
+    transform: rotateX(70deg) rotateY(-18deg) rotateZ(360deg);
   }
 }
 
-/* 3D Spinning Meridian Line Inside the Plain Planet */
-@keyframes planet-globe-spin {
+@keyframes plain-ring-3d-2 {
   0% {
-    transform: rotate(-18deg) scaleX(1);
-  }
-  25% {
-    transform: rotate(-18deg) scaleX(0.05);
+    transform: rotateX(68deg) rotateY(20deg) rotateZ(360deg);
   }
   50% {
-    transform: rotate(-18deg) scaleX(-1);
-  }
-  75% {
-    transform: rotate(-18deg) scaleX(0.05);
+    transform: rotateX(74deg) rotateY(12deg) rotateZ(180deg);
   }
   100% {
-    transform: rotate(-18deg) scaleX(1);
+    transform: rotateX(68deg) rotateY(20deg) rotateZ(0deg);
   }
 }
 
-.animate-planet-float-1 {
-  animation: planet-float-1 24s ease-in-out infinite;
+/* Lowkey Nostalgic Twinkling Stars Animation */
+@keyframes star-twinkle {
+  0%, 100% {
+    opacity: 0.08;
+    transform: scale(0.85) translateY(0px);
+  }
+  50% {
+    opacity: 0.38;
+    transform: scale(1.15) translateY(-6px);
+  }
 }
 
-.animate-planet-float-2 {
-  animation: planet-float-2 28s ease-in-out infinite;
+.animate-calm-orbit-1 {
+  animation: calm-orbit-1 32s ease-in-out infinite;
 }
 
-.animate-ring-tilt-1 {
-  animation: ring-3d-tilt-1 14s ease-in-out infinite;
+.animate-calm-orbit-2 {
+  animation: calm-orbit-2 36s ease-in-out infinite;
 }
 
-.animate-ring-tilt-2 {
-  animation: ring-3d-tilt-2 16s ease-in-out infinite;
+.animate-plain-ring-1 {
+  animation: plain-ring-3d-1 18s linear infinite;
+  transform-style: preserve-3d;
 }
 
-.animate-ring-spin {
-  animation: ring-orbit-spin 16s linear infinite;
+.animate-plain-ring-2 {
+  animation: plain-ring-3d-2 22s linear infinite;
+  transform-style: preserve-3d;
 }
 
-.animate-globe-spin {
-  animation: planet-globe-spin 12s linear infinite;
+.animate-star-twinkle {
+  animation: star-twinkle 6s ease-in-out infinite;
 }
 
 /* Soft Custom Scrollbar */

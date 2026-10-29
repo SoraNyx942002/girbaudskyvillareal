@@ -2,88 +2,24 @@ import { useState, useEffect, useRef } from 'react';
 import phasedImage from './assets/phased.png';
 
 /* -------------------------------------------------------------------------- */
-/*  PLAIN MINIMAL LINE-ART PLANET WITH 3D SPINNING RING & GLOBE ACTION        */
+/*  NOSTALGIC LOWKEY BACKGROUND STARS (SUBTLE, NON-INTRUSIVE)                 */
 /* -------------------------------------------------------------------------- */
-function PlainLinePlanet({
-  isDark = false,
-  sizeClass = 'w-72 h-72 sm:w-[420px] sm:h-[420px]',
-  tiltClass = 'animate-ring-tilt-1',
-}) {
-  /* Plain, clean single-line stroke color (no gradients or shading) */
-  const lineColor = isDark
-    ? 'rgba(245, 243, 239, 0.14)'
-    : 'rgba(28, 25, 23, 0.13)';
-
-  const planetBg = isDark ? '#121110' : '#FAF8F5';
-
-  /* Simple plain line-art ring + small cartoon moon orbiting in 3D */
-  const renderPlainRing = (clipStyle) => (
-    <div
-      className={`absolute inset-0 flex items-center justify-center ${tiltClass}`}
-      style={clipStyle}
-    >
-      <div className="relative w-full h-full flex items-center justify-center animate-ring-spin">
-        <svg viewBox="0 0 400 400" className="w-full h-full overflow-visible">
-          {/* Main Plain Outer Ring */}
-          <circle
-            cx="200"
-            cy="200"
-            r="180"
-            fill="none"
-            stroke={lineColor}
-            strokeWidth="1.75"
-          />
-          {/* Second Thin Inner Ring Line */}
-          <circle
-            cx="200"
-            cy="200"
-            r="158"
-            fill="none"
-            stroke={lineColor}
-            strokeWidth="1.1"
-          />
-          {/* Plain Stick/Cartoon Moon Circle on the Ring */}
-          <circle
-            cx="200"
-            cy="20"
-            r="8"
-            fill={planetBg}
-            stroke={lineColor}
-            strokeWidth="1.75"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className={`relative select-none ${sizeClass}`}>
-      {/* 1. Back half of the 3D ring (passes behind the plain circle planet) */}
-      {renderPlainRing({ clipPath: 'inset(0 0 50% 0)' })}
-
-      {/* 2. Plain Simple Circle Planet Body with 3D Spinning Meridian Line */}
-      <div
-        className="absolute inset-[29%] rounded-full flex items-center justify-center overflow-hidden"
-        style={{
-          backgroundColor: planetBg,
-          border: `1.75px solid ${lineColor}`,
-        }}
-      >
-        {/* 3D Spinning Meridian Circle (gives the plain circle a 3D spinning globe action) */}
-        <div
-          className="w-full h-full rounded-full animate-globe-spin"
-          style={{
-            borderLeft: `1.25px solid ${lineColor}`,
-            borderRight: `1.25px solid ${lineColor}`,
-          }}
-        />
-      </div>
-
-      {/* 3. Front half of the 3D ring (passes in front of the plain circle planet) */}
-      {renderPlainRing({ clipPath: 'inset(50% 0 0 0)' })}
-    </div>
-  );
-}
+const NOSTALGIC_STARS = [
+  { top: '8%', left: '18%', size: 3, delay: '0s', duration: '5.5s', sparkle: false },
+  { top: '14%', left: '48%', size: 2, delay: '1.2s', duration: '7s', sparkle: false },
+  { top: '11%', left: '78%', size: 4, delay: '2.5s', duration: '6.2s', sparkle: true },
+  { top: '24%', left: '88%', size: 2, delay: '0.8s', duration: '8s', sparkle: false },
+  { top: '29%', left: '8%', size: 3, delay: '3.1s', duration: '6.5s', sparkle: false },
+  { top: '36%', left: '64%', size: 2, delay: '1.9s', duration: '7.4s', sparkle: false },
+  { top: '44%', left: '28%', size: 4, delay: '4.0s', duration: '5.8s', sparkle: true },
+  { top: '52%', left: '92%', size: 3, delay: '2.2s', duration: '6.9s', sparkle: false },
+  { top: '59%', left: '14%', size: 2, delay: '0.4s', duration: '7.8s', sparkle: false },
+  { top: '67%', left: '54%', size: 3, delay: '3.6s', duration: '6.1s', sparkle: false },
+  { top: '74%', left: '82%', size: 4, delay: '1.5s', duration: '5.9s', sparkle: true },
+  { top: '81%', left: '22%', size: 2, delay: '2.8s', duration: '7.2s', sparkle: false },
+  { top: '88%', left: '68%', size: 3, delay: '0.9s', duration: '6.6s', sparkle: false },
+  { top: '93%', left: '38%', size: 2, delay: '3.9s', duration: '8.2s', sparkle: false },
+];
 
 /* -------------------------------------------------------------------------- */
 /*  SOFT AESTHETIC SURFACE CARD                                               */
@@ -174,7 +110,7 @@ export default function App() {
   const [cvFilter, setCvFilter] = useState('all');
   const [selectedSkill, setSelectedSkill] = useState(null);
 
-  /* Permanent Performance Reviews (Including Ralph's Review) */
+  /* Permanent Performance Reviews (Guaranteed to include Ralph's 5/5 review) */
   const defaultReviews = [
     {
       id: 'ralph-verified',
@@ -207,20 +143,9 @@ export default function App() {
 
   const [reviews, setReviews] = useState(() => {
     try {
-      const saved = localStorage.getItem('gsv-performance-reviews-v2');
+      const saved = localStorage.getItem('gsv-performance-reviews-v3');
       if (saved) {
         return JSON.parse(saved);
-      }
-      const legacy = localStorage.getItem('gsv-performance-reviews');
-      if (legacy) {
-        const parsedLegacy = JSON.parse(legacy);
-        const customOnly = parsedLegacy.filter(
-          (item) =>
-            item.name?.toLowerCase() !== 'ralph' &&
-            item.name !== 'Project Collaborator' &&
-            item.name !== 'Enterprise Client'
-        );
-        return [...customOnly, ...defaultReviews];
       }
       return defaultReviews;
     } catch {
@@ -368,7 +293,7 @@ export default function App() {
     const updated = [newEntry, ...reviews];
     setReviews(updated);
     try {
-      localStorage.setItem('gsv-performance-reviews-v2', JSON.stringify(updated));
+      localStorage.setItem('gsv-performance-reviews-v3', JSON.stringify(updated));
     } catch {
       // ignore storage errors
     }
@@ -497,6 +422,14 @@ export default function App() {
     ? 'bg-[#23312B] text-[#9CC5B0] border-[#31453C]'
     : 'bg-[#EBF2EE] text-[#355245] border-[#D5E3DC]';
 
+  /* Plain Circle + Ring Border Contrast */
+  const plainCircleBorder = isDark
+    ? 'border-white/[0.11]'
+    : 'border-stone-900/[0.11]';
+  const plainRingBorder = isDark
+    ? 'border-white/[0.15]'
+    : 'border-stone-900/[0.15]';
+
   const averageRating = (
     reviews.reduce((acc, item) => acc + item.rating, 0) / (reviews.length || 1)
   ).toFixed(1);
@@ -510,37 +443,94 @@ export default function App() {
       }`}
     >
       {/* ---------------------------------------------------------------------- */}
-      {/*  PLAIN MINIMAL LINE-ART PLANETS WITH 3D SPINNING RINGS IN BACKGROUND   */}
+      {/*  BACKGROUND: LOWKEY NOSTALGIC STARS + PLAIN CIRCLES WITH A RING        */}
       {/* ---------------------------------------------------------------------- */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-        {/* Soft Ambient Background Glows */}
+        {/* Soft Ambient Pastel Glows */}
         <div
-          className={`absolute -top-24 right-[8%] w-72 sm:w-[460px] h-72 sm:h-[460px] rounded-full blur-[115px] animate-planet-float-1 ${
+          className={`absolute -top-24 right-[8%] w-72 sm:w-[460px] h-72 sm:h-[460px] rounded-full blur-[115px] animate-calm-orbit-1 ${
             isDark ? 'bg-[#2D3E35]/20' : 'bg-[#DCE8E1]/70'
           }`}
         />
         <div
-          className={`absolute top-[40%] -left-24 w-72 sm:w-[440px] h-72 sm:h-[440px] rounded-full blur-[115px] animate-planet-float-2 ${
+          className={`absolute top-[40%] -left-24 w-72 sm:w-[440px] h-72 sm:h-[440px] rounded-full blur-[115px] animate-calm-orbit-2 ${
             isDark ? 'bg-[#3A2E25]/20' : 'bg-[#EFE6DC]/75'
           }`}
         />
 
-        {/* Planet 1: Upper-Left Plain Circle Planet with 3D Spinning Ring */}
-        <div className="absolute top-[11%] -left-14 sm:left-[4%] animate-planet-float-1">
-          <PlainLinePlanet
-            isDark={isDark}
-            sizeClass="w-64 h-64 sm:w-[390px] sm:h-[390px]"
-            tiltClass="animate-ring-tilt-1"
+        {/* Nostalgic Lowkey Twinkling Stars in Deep Background */}
+        {NOSTALGIC_STARS.map((star, index) => (
+          <div
+            key={index}
+            style={{
+              top: star.top,
+              left: star.left,
+              animationDelay: star.delay,
+              animationDuration: star.duration,
+            }}
+            className="absolute animate-star-twinkle select-none"
+          >
+            {star.sparkle ? (
+              <span
+                className={`text-[10px] sm:text-xs leading-none block ${
+                  isDark ? 'text-stone-200/40' : 'text-stone-700/35'
+                }`}
+              >
+                ✦
+              </span>
+            ) : (
+              <span
+                style={{ width: `${star.size}px`, height: `${star.size}px` }}
+                className={`block rounded-full ${
+                  isDark ? 'bg-stone-200/40' : 'bg-stone-700/35'
+                }`}
+              />
+            )}
+          </div>
+        ))}
+
+        {/* PLAIN CIRCLE PLANET 1 (Upper-Left): Exact Plain Circle + Simple 3D Ring */}
+        <div
+          className="absolute top-[14%] left-[4%] sm:left-[8%] w-64 h-64 sm:w-96 sm:h-96 flex items-center justify-center animate-calm-orbit-1"
+          style={{ perspective: '900px' }}
+        >
+          {/* The Original Plain Hollow Circle */}
+          <div
+            className={`w-36 h-36 sm:w-56 sm:h-56 rounded-full border ${plainCircleBorder}`}
           />
+          {/* Simple Plain 3D Spinning Ring Around It */}
+          <div
+            className={`absolute w-64 h-64 sm:w-96 sm:h-96 rounded-full border ${plainRingBorder} animate-plain-ring-1`}
+          >
+            {/* Tiny Plain Orbiting Dot on the Ring */}
+            <span
+              className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${
+                isDark ? 'bg-white/25' : 'bg-stone-800/25'
+              }`}
+            />
+          </div>
         </div>
 
-        {/* Planet 2: Lower-Right Plain Circle Planet with 3D Spinning Ring */}
-        <div className="absolute bottom-[8%] -right-14 sm:right-[4%] animate-planet-float-2">
-          <PlainLinePlanet
-            isDark={isDark}
-            sizeClass="w-72 h-72 sm:w-[440px] sm:h-[440px]"
-            tiltClass="animate-ring-tilt-2"
+        {/* PLAIN CIRCLE PLANET 2 (Lower-Right): Exact Plain Circle + Simple 3D Ring */}
+        <div
+          className="absolute bottom-[10%] right-[2%] sm:right-[7%] w-72 h-72 sm:w-[430px] sm:h-[430px] flex items-center justify-center animate-calm-orbit-2"
+          style={{ perspective: '900px' }}
+        >
+          {/* The Original Plain Hollow Circle */}
+          <div
+            className={`w-44 h-44 sm:w-64 sm:h-64 rounded-full border ${plainCircleBorder}`}
           />
+          {/* Simple Plain 3D Spinning Ring Around It */}
+          <div
+            className={`absolute w-72 h-72 sm:w-[430px] sm:h-[430px] rounded-full border ${plainRingBorder} animate-plain-ring-2`}
+          >
+            {/* Tiny Plain Orbiting Dot on the Ring */}
+            <span
+              className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${
+                isDark ? 'bg-white/25' : 'bg-stone-800/25'
+              }`}
+            />
+          </div>
         </div>
       </div>
 
