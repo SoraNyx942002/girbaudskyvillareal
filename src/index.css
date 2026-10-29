@@ -58,47 +58,65 @@
   overflow: hidden;
 }
 
-/* Calm, Slow Ambient Background Objects */
-@keyframes calm-drift-1 {
+/* Calm Floating Planet Trajectories */
+@keyframes planet-drift-1 {
   0%, 100% {
-    transform: translate3d(0px, 0px, 0) scale(1) rotate(0deg);
+    transform: translate3d(0px, 0px, 0) rotate(0deg);
   }
   33% {
-    transform: translate3d(45px, -35px, 0) scale(1.06) rotate(4deg);
+    transform: translate3d(38px, -28px, 0) rotate(2.5deg);
   }
   66% {
-    transform: translate3d(-30px, 25px, 0) scale(0.96) rotate(-3deg);
+    transform: translate3d(-24px, 22px, 0) rotate(-2deg);
   }
 }
 
-@keyframes calm-drift-2 {
-  0%, 100% {
-    transform: translate3d(0px, 0px, 0) scale(1) rotate(0deg);
-  }
-  50% {
-    transform: translate3d(-55px, 40px, 0) scale(1.08) rotate(-6deg);
-  }
-}
-
-@keyframes calm-orbit {
+@keyframes planet-drift-2 {
   0%, 100% {
     transform: translate3d(0px, 0px, 0) rotate(0deg);
   }
   50% {
-    transform: translate3d(30px, -45px, 0) rotate(12deg);
+    transform: translate3d(-45px, -32px, 0) rotate(-3deg);
   }
 }
 
-.animate-calm-1 {
-  animation: calm-drift-1 28s ease-in-out infinite;
+/* Continuous Orbital Ring Rotation */
+@keyframes orbit-spin-cw {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-calm-2 {
-  animation: calm-drift-2 34s ease-in-out infinite;
+@keyframes orbit-spin-ccw {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
-.animate-calm-orbit {
-  animation: calm-orbit 38s ease-in-out infinite;
+.animate-planet-1 {
+  animation: planet-drift-1 26s ease-in-out infinite;
+}
+
+.animate-planet-2 {
+  animation: planet-drift-2 32s ease-in-out infinite;
+}
+
+.animate-ring-cw {
+  animation: orbit-spin-cw 28s linear infinite;
+}
+
+.animate-ring-ccw {
+  animation: orbit-spin-ccw 36s linear infinite;
+}
+
+.animate-ring-fast {
+  animation: orbit-spin-cw 18s linear infinite;
 }
 
 /* Soft Custom Scrollbar */

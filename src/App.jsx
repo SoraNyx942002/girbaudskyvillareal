@@ -2,6 +2,179 @@ import { useState, useEffect, useRef } from 'react';
 import phasedImage from './assets/phased.png';
 
 /* -------------------------------------------------------------------------- */
+/*  AESTHETIC CELESTIAL PLANET WITH 3D-WRAPPED MOVING RINGS                   */
+/* -------------------------------------------------------------------------- */
+function CelestialPlanet({
+  isDark = false,
+  sizeClass = 'w-72 h-72 sm:w-[420px] sm:h-[420px]',
+  tiltDeg = -22,
+  variant = 'sage',
+}) {
+  const strokeColor = isDark
+    ? variant === 'sage'
+      ? 'rgba(156, 197, 176, 0.34)'
+      : 'rgba(214, 199, 178, 0.3)'
+    : variant === 'sage'
+    ? 'rgba(53, 82, 69, 0.26)'
+    : 'rgba(120, 98, 76, 0.24)';
+
+  const secondaryStroke = isDark
+    ? 'rgba(245, 243, 239, 0.16)'
+    : 'rgba(28, 25, 23, 0.14)';
+
+  const moonFill = isDark
+    ? variant === 'sage'
+      ? '#9CC5B0'
+      : '#E6D5B8'
+    : variant === 'sage'
+    ? '#355245'
+    : '#78624C';
+
+  /* Reusable spinning rings SVG layer (rendered behind top half & in front of bottom half) */
+  const renderRingsLayer = (clipStyle) => (
+    <div
+      className="absolute inset-0 flex items-center justify-center"
+      style={{
+        transform: `rotate(${tiltDeg}deg) scaleY(0.34)`,
+        ...clipStyle,
+      }}
+    >
+      {/* Outer Rotating Ring + Orbiting Moon */}
+      <div className="relative w-full h-full flex items-center justify-center animate-ring-cw">
+        <svg viewBox="0 0 400 400" className="w-full h-full overflow-visible">
+          <circle
+            cx="200"
+            cy="200"
+            r="182"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="1.75"
+            strokeDasharray="18 10 6 10"
+          />
+          <circle
+            cx="200"
+            cy="200"
+            r="164"
+            fill="none"
+            stroke={secondaryStroke}
+            strokeWidth="1.2"
+          />
+          {/* Orbiting Outer Moon */}
+          <circle cx="200" cy="18" r="6.5" fill={moonFill} opacity="0.85" />
+          <circle
+            cx="200"
+            cy="18"
+            r="12"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="1.2"
+          />
+        </svg>
+      </div>
+
+      {/* Middle Counter-Rotating Ring */}
+      <div className="absolute inset-[12%] flex items-center justify-center animate-ring-ccw">
+        <svg viewBox="0 0 400 400" className="w-full h-full overflow-visible">
+          <circle
+            cx="200"
+            cy="200"
+            r="175"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="2.4"
+            strokeDasharray="60 18 12 18"
+          />
+          {/* Second Orbiting Moonlet */}
+          <circle cx="375" cy="200" r="5" fill={moonFill} opacity="0.7" />
+        </svg>
+      </div>
+
+      {/* Inner Fast Shimmer Ring */}
+      <div className="absolute inset-[23%] flex items-center justify-center animate-ring-fast">
+        <svg viewBox="0 0 400 400" className="w-full h-full overflow-visible">
+          <circle
+            cx="200"
+            cy="200"
+            r="170"
+            fill="none"
+            stroke={secondaryStroke}
+            strokeWidth="1.5"
+            strokeDasharray="8 14"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`relative select-none ${sizeClass}`}>
+      {/* 1. BACK HALF OF RINGS (Passes behind the top of the planet sphere) */}
+      {renderRingsLayer({ clipPath: 'inset(0 0 50% 0)' })}
+
+      {/* 2. CENTRAL PLANET SPHERE */}
+      <div className="absolute inset-[29%] rounded-full overflow-hidden flex items-center justify-center">
+        <div
+          className="w-full h-full rounded-full relative"
+          style={{
+            background: isDark
+              ? variant === 'sage'
+                ? 'radial-gradient(circle at 32% 28%, rgba(156, 197, 176, 0.28), rgba(35, 49, 43, 0.22) 55%, rgba(18, 17, 16, 0.4) 100%)'
+                : 'radial-gradient(circle at 32% 28%, rgba(230, 213, 184, 0.25), rgba(56, 46, 39, 0.2) 55%, rgba(18, 17, 16, 0.4) 100%)'
+              : variant === 'sage'
+              ? 'radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.9), rgba(213, 227, 220, 0.65) 52%, rgba(156, 182, 169, 0.38) 100%)'
+              : 'radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.9), rgba(235, 225, 212, 0.65) 52%, rgba(186, 168, 148, 0.35) 100%)',
+            boxShadow: isDark
+              ? `inset -14px -16px 28px rgba(0, 0, 0, 0.55), inset 4px 4px 14px ${strokeColor}, 0 0 40px -10px ${strokeColor}`
+              : `inset -14px -16px 28px rgba(28, 25, 23, 0.12), inset 4px 4px 14px rgba(255, 255, 255, 0.8), 0 12px 35px -10px rgba(28, 25, 23, 0.08)`,
+            border: `1px solid ${strokeColor}`,
+          }}
+        >
+          {/* Subtle Planet Surface Latitude Lines */}
+          <svg
+            viewBox="0 0 200 200"
+            className="w-full h-full opacity-60"
+            style={{ transform: `rotate(${tiltDeg}deg)` }}
+          >
+            <ellipse
+              cx="100"
+              cy="70"
+              rx="86"
+              ry="18"
+              fill="none"
+              stroke={secondaryStroke}
+              strokeWidth="1"
+              strokeDasharray="6 6"
+            />
+            <ellipse
+              cx="100"
+              cy="100"
+              rx="98"
+              ry="22"
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth="1.1"
+            />
+            <ellipse
+              cx="100"
+              cy="132"
+              rx="84"
+              ry="16"
+              fill="none"
+              stroke={secondaryStroke}
+              strokeWidth="1"
+              strokeDasharray="8 6"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* 3. FRONT HALF OF RINGS (Passes in front of the bottom of the planet sphere) */}
+      {renderRingsLayer({ clipPath: 'inset(50% 0 0 0)' })}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  SOFT AESTHETIC SURFACE CARD                                               */
 /* -------------------------------------------------------------------------- */
 function AestheticCard({ children, className = '', isDark = false }) {
@@ -90,10 +263,19 @@ export default function App() {
   const [cvFilter, setCvFilter] = useState('all');
   const [selectedSkill, setSelectedSkill] = useState(null);
 
-  /* Performance Ratings & Reviews State */
-  const initialReviews = [
+  /* Permanent Performance Reviews (Including Ralph's Review) */
+  const defaultReviews = [
     {
-      id: 1,
+      id: 'ralph-verified',
+      name: 'Ralph',
+      role: 'Client / Peer Reviewer',
+      rating: 5,
+      comment:
+        'He exhibits good communication skills and is very responsive. Thank you sir.',
+      date: '2026',
+    },
+    {
+      id: 'collaborator-verified',
       name: 'Project Collaborator',
       role: 'Undecide Dev Team',
       rating: 5,
@@ -102,7 +284,7 @@ export default function App() {
       date: '2026',
     },
     {
-      id: 2,
+      id: 'enterprise-verified',
       name: 'Enterprise Client',
       role: 'Hardware & Systems Consultation',
       rating: 5,
@@ -114,12 +296,28 @@ export default function App() {
 
   const [reviews, setReviews] = useState(() => {
     try {
-      const saved = localStorage.getItem('gsv-performance-reviews');
-      return saved ? JSON.parse(saved) : initialReviews;
+      const saved = localStorage.getItem('gsv-performance-reviews-v2');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      /* Merge any custom reviews from v1 without duplicating Ralph or defaults */
+      const legacy = localStorage.getItem('gsv-performance-reviews');
+      if (legacy) {
+        const parsedLegacy = JSON.parse(legacy);
+        const customOnly = parsedLegacy.filter(
+          (item) =>
+            item.name?.toLowerCase() !== 'ralph' &&
+            item.name !== 'Project Collaborator' &&
+            item.name !== 'Enterprise Client'
+        );
+        return [...customOnly, ...defaultReviews];
+      }
+      return defaultReviews;
     } catch {
-      return initialReviews;
+      return defaultReviews;
     }
   });
+
   const [ratingInput, setRatingInput] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewerName, setReviewerName] = useState('');
@@ -260,7 +458,7 @@ export default function App() {
     const updated = [newEntry, ...reviews];
     setReviews(updated);
     try {
-      localStorage.setItem('gsv-performance-reviews', JSON.stringify(updated));
+      localStorage.setItem('gsv-performance-reviews-v2', JSON.stringify(updated));
     } catch {
       // ignore storage errors
     }
@@ -402,32 +600,40 @@ export default function App() {
       }`}
     >
       {/* ---------------------------------------------------------------------- */}
-      {/*  CALM MOVING BACKGROUND OBJECTS (NON-INTRUSIVE AMBIENT MOTION)         */}
+      {/*  CALM CELESTIAL PLANETS WITH MOVING RINGS IN THE BACKGROUND            */}
       {/* ---------------------------------------------------------------------- */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-        {/* Slow Drifting Sage Orb */}
+        {/* Soft Ambient Color Glows */}
         <div
-          className={`absolute -top-24 right-[8%] w-72 sm:w-[460px] h-72 sm:h-[460px] rounded-full blur-[110px] animate-calm-1 ${
+          className={`absolute -top-24 right-[8%] w-72 sm:w-[460px] h-72 sm:h-[460px] rounded-full blur-[115px] animate-planet-1 ${
             isDark ? 'bg-[#2D3E35]/25' : 'bg-[#DCE8E1]/75'
           }`}
         />
-        {/* Slow Drifting Warm Sand Orb */}
         <div
-          className={`absolute top-[38%] -left-24 w-72 sm:w-[440px] h-72 sm:h-[440px] rounded-full blur-[115px] animate-calm-2 ${
+          className={`absolute top-[40%] -left-24 w-72 sm:w-[440px] h-72 sm:h-[440px] rounded-full blur-[115px] animate-planet-2 ${
             isDark ? 'bg-[#3A2E25]/25' : 'bg-[#EFE6DC]/80'
           }`}
         />
-        {/* Subtle Architectural Floating Rings (Very Low Opacity) */}
-        <div
-          className={`absolute top-[18%] left-[12%] w-64 h-64 sm:w-96 sm:h-96 rounded-full border animate-calm-orbit ${
-            isDark ? 'border-white/[0.03]' : 'border-stone-900/[0.04]'
-          }`}
-        />
-        <div
-          className={`absolute bottom-[14%] right-[10%] w-72 h-72 sm:w-[420px] sm:h-[420px] rounded-full border animate-calm-2 ${
-            isDark ? 'border-white/[0.025]' : 'border-stone-900/[0.035]'
-          }`}
-        />
+
+        {/* Planet 1: Upper-Left Ringed Celestial Planet */}
+        <div className="absolute top-[11%] -left-14 sm:left-[4%] opacity-85 animate-planet-1">
+          <CelestialPlanet
+            isDark={isDark}
+            sizeClass="w-64 h-64 sm:w-[390px] sm:h-[390px]"
+            tiltDeg={-22}
+            variant="sage"
+          />
+        </div>
+
+        {/* Planet 2: Lower-Right Ringed Celestial Planet */}
+        <div className="absolute bottom-[8%] -right-14 sm:right-[4%] opacity-85 animate-planet-2">
+          <CelestialPlanet
+            isDark={isDark}
+            sizeClass="w-72 h-72 sm:w-[440px] sm:h-[440px]"
+            tiltDeg={19}
+            variant="warm"
+          />
+        </div>
       </div>
 
       {/* Copy Toast Notification */}
