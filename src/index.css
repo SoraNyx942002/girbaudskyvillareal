@@ -58,30 +58,46 @@
   overflow: hidden;
 }
 
-/* Calm Floating Planet Trajectories */
-@keyframes planet-drift-1 {
+/* Calm Floating Drift for the Plain Line-Art Planets */
+@keyframes planet-float-1 {
   0%, 100% {
-    transform: translate3d(0px, 0px, 0) rotate(0deg);
-  }
-  33% {
-    transform: translate3d(38px, -28px, 0) rotate(2.5deg);
-  }
-  66% {
-    transform: translate3d(-24px, 22px, 0) rotate(-2deg);
-  }
-}
-
-@keyframes planet-drift-2 {
-  0%, 100% {
-    transform: translate3d(0px, 0px, 0) rotate(0deg);
+    transform: translate3d(0px, 0px, 0);
   }
   50% {
-    transform: translate3d(-45px, -32px, 0) rotate(-3deg);
+    transform: translate3d(32px, -26px, 0);
   }
 }
 
-/* Continuous Orbital Ring Rotation */
-@keyframes orbit-spin-cw {
+@keyframes planet-float-2 {
+  0%, 100% {
+    transform: translate3d(0px, 0px, 0);
+  }
+  50% {
+    transform: translate3d(-36px, 28px, 0);
+  }
+}
+
+/* 3D Ring Tilt & Gyroscopic Wobble Action */
+@keyframes ring-3d-tilt-1 {
+  0%, 100% {
+    transform: rotate(-22deg) scaleY(0.30);
+  }
+  50% {
+    transform: rotate(-12deg) scaleY(0.42);
+  }
+}
+
+@keyframes ring-3d-tilt-2 {
+  0%, 100% {
+    transform: rotate(20deg) scaleY(0.32);
+  }
+  50% {
+    transform: rotate(10deg) scaleY(0.22);
+  }
+}
+
+/* 3D Orbiting Moon & Ring Spin */
+@keyframes ring-orbit-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -90,33 +106,47 @@
   }
 }
 
-@keyframes orbit-spin-ccw {
+/* 3D Spinning Meridian Line Inside the Plain Planet */
+@keyframes planet-globe-spin {
   0% {
-    transform: rotate(360deg);
+    transform: rotate(-18deg) scaleX(1);
+  }
+  25% {
+    transform: rotate(-18deg) scaleX(0.05);
+  }
+  50% {
+    transform: rotate(-18deg) scaleX(-1);
+  }
+  75% {
+    transform: rotate(-18deg) scaleX(0.05);
   }
   100% {
-    transform: rotate(0deg);
+    transform: rotate(-18deg) scaleX(1);
   }
 }
 
-.animate-planet-1 {
-  animation: planet-drift-1 26s ease-in-out infinite;
+.animate-planet-float-1 {
+  animation: planet-float-1 24s ease-in-out infinite;
 }
 
-.animate-planet-2 {
-  animation: planet-drift-2 32s ease-in-out infinite;
+.animate-planet-float-2 {
+  animation: planet-float-2 28s ease-in-out infinite;
 }
 
-.animate-ring-cw {
-  animation: orbit-spin-cw 28s linear infinite;
+.animate-ring-tilt-1 {
+  animation: ring-3d-tilt-1 14s ease-in-out infinite;
 }
 
-.animate-ring-ccw {
-  animation: orbit-spin-ccw 36s linear infinite;
+.animate-ring-tilt-2 {
+  animation: ring-3d-tilt-2 16s ease-in-out infinite;
 }
 
-.animate-ring-fast {
-  animation: orbit-spin-cw 18s linear infinite;
+.animate-ring-spin {
+  animation: ring-orbit-spin 16s linear infinite;
+}
+
+.animate-globe-spin {
+  animation: planet-globe-spin 12s linear infinite;
 }
 
 /* Soft Custom Scrollbar */
