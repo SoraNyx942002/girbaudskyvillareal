@@ -11,11 +11,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
   .font-serif-editorial {
     font-family: 'Instrument Serif', Georgia, serif;
   }
-
   .font-display {
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
@@ -32,7 +30,6 @@
     transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, filter, transform;
 }
-
 .reveal.active {
   opacity: 1;
   filter: blur(0px);
@@ -48,105 +45,49 @@
     grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
 .accordion-grid.open {
   grid-template-rows: 1fr;
   opacity: 1;
 }
-
 .accordion-inner {
   overflow: hidden;
 }
 
-/* Calm Floating Drift for the Plain Circles */
+/* Calm Floating Drift for Plain Circles */
 @keyframes calm-orbit-1 {
-  0%, 100% {
-    transform: translate3d(0px, 0px, 0);
-  }
-  50% {
-    transform: translate3d(30px, -35px, 0);
-  }
+  0%, 100% { transform: translate3d(0px, 0px, 0); }
+  50% { transform: translate3d(30px, -35px, 0); }
 }
-
 @keyframes calm-orbit-2 {
-  0%, 100% {
-    transform: translate3d(0px, 0px, 0);
-  }
-  50% {
-    transform: translate3d(-40px, 30px, 0);
-  }
+  0%, 100% { transform: translate3d(0px, 0px, 0); }
+  50% { transform: translate3d(-40px, 30px, 0); }
 }
 
-/* 3D Spinning & Tilting Ring Action Around the Plain Circle */
+/* 3D Spinning Ring Around the Plain Circle */
 @keyframes plain-ring-3d-1 {
-  0% {
-    transform: rotateX(70deg) rotateY(-18deg) rotateZ(0deg);
-  }
-  50% {
-    transform: rotateX(63deg) rotateY(-10deg) rotateZ(180deg);
-  }
-  100% {
-    transform: rotateX(70deg) rotateY(-18deg) rotateZ(360deg);
-  }
+  0% { transform: rotateX(70deg) rotateY(-18deg) rotateZ(0deg); }
+  50% { transform: rotateX(63deg) rotateY(-10deg) rotateZ(180deg); }
+  100% { transform: rotateX(70deg) rotateY(-18deg) rotateZ(360deg); }
 }
-
 @keyframes plain-ring-3d-2 {
-  0% {
-    transform: rotateX(68deg) rotateY(20deg) rotateZ(360deg);
-  }
-  50% {
-    transform: rotateX(74deg) rotateY(12deg) rotateZ(180deg);
-  }
-  100% {
-    transform: rotateX(68deg) rotateY(20deg) rotateZ(0deg);
-  }
+  0% { transform: rotateX(68deg) rotateY(20deg) rotateZ(360deg); }
+  50% { transform: rotateX(74deg) rotateY(12deg) rotateZ(180deg); }
+  100% { transform: rotateX(68deg) rotateY(20deg) rotateZ(0deg); }
 }
 
-/* Lowkey Nostalgic Twinkling Stars Animation */
+/* Lowkey Nostalgic Twinkling Stars */
 @keyframes star-twinkle {
-  0%, 100% {
-    opacity: 0.08;
-    transform: scale(0.85) translateY(0px);
-  }
-  50% {
-    opacity: 0.38;
-    transform: scale(1.15) translateY(-6px);
-  }
+  0%, 100% { opacity: 0.08; transform: scale(0.85) translateY(0px); }
+  50% { opacity: 0.38; transform: scale(1.15) translateY(-6px); }
 }
 
-.animate-calm-orbit-1 {
-  animation: calm-orbit-1 32s ease-in-out infinite;
-}
+.animate-calm-orbit-1 { animation: calm-orbit-1 32s ease-in-out infinite; }
+.animate-calm-orbit-2 { animation: calm-orbit-2 36s ease-in-out infinite; }
+.animate-plain-ring-1 { animation: plain-ring-3d-1 18s linear infinite; transform-style: preserve-3d; }
+.animate-plain-ring-2 { animation: plain-ring-3d-2 22s linear infinite; transform-style: preserve-3d; }
+.animate-star-twinkle { animation: star-twinkle 6s ease-in-out infinite; }
 
-.animate-calm-orbit-2 {
-  animation: calm-orbit-2 36s ease-in-out infinite;
-}
-
-.animate-plain-ring-1 {
-  animation: plain-ring-3d-1 18s linear infinite;
-  transform-style: preserve-3d;
-}
-
-.animate-plain-ring-2 {
-  animation: plain-ring-3d-2 22s linear infinite;
-  transform-style: preserve-3d;
-}
-
-.animate-star-twinkle {
-  animation: star-twinkle 6s ease-in-out infinite;
-}
-
-/* Soft Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(120, 113, 108, 0.25);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 113, 108, 0.45);
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(120, 113, 108, 0.25); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(120, 113, 108, 0.45); }
