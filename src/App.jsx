@@ -1,6 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import phasedImage from './assets/phased.png';
 
+/* Automatically discover any images placed in src/ or src/assets/ */
+const BUNDLED_ASSETS = import.meta.glob(
+  './**/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}',
+  { eager: true, import: 'default' }
+);
+
+function findBundledImage(keyword) {
+  const lowerKey = keyword.toLowerCase();
+  for (const [path, url] of Object.entries(BUNDLED_ASSETS)) {
+    if (path.toLowerCase().includes(lowerKey)) {
+      return url;
+    }
+  }
+  return null;
+}
+
 const NOSTALGIC_STARS = [
   { top: '8%', left: '18%', size: 3, delay: '0s', duration: '5.5s', sparkle: false },
   { top: '14%', left: '48%', size: 2, delay: '1.2s', duration: '7s', sparkle: false },
@@ -18,6 +34,9 @@ const NOSTALGIC_STARS = [
   { top: '93%', left: '38%', size: 2, delay: '3.9s', duration: '8.2s', sparkle: false },
 ];
 
+/* -------------------------------------------------------------------------- */
+/*  SOFT AESTHETIC SURFACE CARD (WITH FULL-HEIGHT FLEX ALIGNMENT)             */
+/* -------------------------------------------------------------------------- */
 function AestheticCard({ children, className = '', isDark = false }) {
   const cardRef = useRef(null);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
@@ -35,7 +54,7 @@ function AestheticCard({ children, className = '', isDark = false }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative overflow-hidden rounded-3xl transition-all duration-500 ${
+      className={`relative overflow-hidden rounded-3xl transition-all duration-500 h-full ${
         isDark
           ? 'bg-[#1A1917]/85 border border-[#2E2C29] hover:border-[#44403C] shadow-2xl shadow-black/35'
           : 'bg-white/85 border border-[#E7E5E0] hover:border-[#D6D3CD] shadow-[0_10px_35px_-15px_rgba(28,25,23,0.06)] hover:shadow-[0_18px_45px_-15px_rgba(28,25,23,0.1)]'
@@ -50,30 +69,176 @@ function AestheticCard({ children, className = '', isDark = false }) {
             : `radial-gradient(520px circle at ${coords.x}px ${coords.y}px, rgba(168, 162, 158, 0.08), transparent 45%)`,
         }}
       />
-      <div className="relative z-10 h-full">{children}</div>
+      <div className="relative z-10 h-full flex flex-col">{children}</div>
     </div>
   );
 }
 
-/* Smart Certificate Image Loader with Extension Fallback (.png <-> .jpg) */
-function SmartCertImage({ src, fallbackSrc, alt, className = '' }) {
-  const [currentSrc, setCurrentSrc] = useState(src);
-  const [usedFallback, setUsedFallback] = useState(false);
+/* -------------------------------------------------------------------------- */
+/*  HIGH-RES BUILT-IN VISUAL CERTIFICATE REPLICA (IF IMAGE FILE IS MISSING)   */
+/* -------------------------------------------------------------------------- */
+function BuiltInCertificateDocument({ certId }) {
+  if (certId === 'tesda-ncii') {
+    return (
+      <div className="w-full h-full max-w-[380px] aspect-[1/1.35] bg-white text-zinc-900 rounded-lg p-4 border-2 border-indigo-900/30 shadow-md flex flex-col justify-between text-center select-none mx-auto overflow-hidden relative">
+        <div>
+          <div className="w-7 h-7 rounded-full bg-blue-900 text-white text-[8px] font-bold flex items-center justify-center mx-auto mb-1">
+            TESDA
+          </div>
+          <div className="text-[7px] uppercase tracking-wider text-zinc-600">
+            Republic of the Philippines
+          </div>
+          <div className="text-[8px] font-bold tracking-wide text-zinc-800">
+            TECHNICAL EDUCATION AND SKILLS DEVELOPMENT AUTHORITY
+          </div>
+          <div className="my-1.5 py-1 bg-yellow-200/80 text-blue-950 font-extrabold text-[11px] tracking-wider">
+            NATIONAL CERTIFICATE II
+          </div>
+          <div className="text-[8px] italic text-zinc-500">in</div>
+          <div className="text-[10px] font-extrabold text-zinc-900 tracking-wide">
+            COMPUTER SYSTEMS SERVICING
+          </div>
+          <div className="text-[7px] italic text-zinc-500 mt-1">is hereby awarded to</div>
+          <div className="text-[11px] font-extrabold text-zinc-900 mt-0.5">
+            GIRBAUD SKY E. VILLAREAL
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-left text-[6px] text-zinc-700 border-t border-b border-zinc-200 py-1.5 my-1">
+          <div>
+            <div className="font-bold text-zinc-900">BASIC & COMMON</div>
+            <div>• Workplace communication</div>
+            <div>• Apply quality standards</div>
+            <div>• Perform computer operations</div>
+          </div>
+          <div>
+            <div className="font-bold text-zinc-900">CORE COMPETENCIES</div>
+            <div>• Install & configure systems</div>
+            <div>• Set-up Computer Networks</div>
+            <div>• Set-up Computer Servers</div>
+          </div>
+        </div>
+        <div className="flex items-end justify-between text-[6.5px] text-zinc-700 pt-1">
+          <div className="text-left">
+            <div className="font-bold text-blue-900">TESDA</div>
+            <div>Cert No: 26131402035012</div>
+          </div>
+          <div className="text-center">
+            <div className="font-bold text-zinc-900">JOSE FRANCISCO &quot;KIKO&quot; B. BENITEZ</div>
+            <div className="text-[6px]">DIRECTOR GENERAL</div>
+          </div>
+          <div className="text-right">
+            <div>Issued: Oct 22, 2026</div>
+            <div>Valid: Oct 21, 2031</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (certId === 'cisco-data-science') {
+    return (
+      <div className="w-full h-full max-w-[440px] aspect-[1.42/1] bg-white text-zinc-900 rounded-lg p-4 border border-zinc-300 shadow-md flex flex-col justify-between text-center select-none mx-auto">
+        <div className="flex items-center justify-start gap-1.5 text-left">
+          <span className="font-extrabold text-[10px] tracking-tighter text-zinc-900">CISCO</span>
+          <span className="text-[9px] text-sky-600 font-medium">Networking Academy</span>
+        </div>
+        <div className="space-y-1 my-auto py-2">
+          <div className="text-[8px] text-zinc-500">This certificate is awarded to</div>
+          <div className="text-sm sm:text-base font-extrabold text-sky-700">
+            Girbaud Sky Villareal
+          </div>
+          <div className="text-[8px] text-zinc-600">for successfully completing</div>
+          <div className="text-xs font-extrabold text-sky-800">
+            Introduction to Data Science
+          </div>
+          <div className="text-[7.5px] text-zinc-500">
+            offered by DICT-ITU DTC Initiative through the Cisco Networking Academy program.
+          </div>
+        </div>
+        <div className="flex items-end justify-between text-[7.5px] text-zinc-600 border-t border-zinc-200 pt-2">
+          <div className="text-left">
+            <div className="font-semibold text-zinc-800">John Philip Tan</div>
+            <div>Instructor • DICT-ITU DTC Initiative</div>
+          </div>
+          <div className="text-right">
+            <div className="font-bold text-zinc-900">31 Jan 2026</div>
+            <div>Completion Date</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full max-w-[440px] aspect-[1.42/1] bg-[#FCFBF7] text-zinc-900 rounded-lg p-4 border-2 border-amber-600/50 shadow-md flex flex-col justify-between text-center select-none mx-auto">
+      <div>
+        <div className="text-[7px] font-bold uppercase tracking-wider text-emerald-950">
+          NATIONAL COLLEGE OF BUSINESS AND ARTS – FAIRVIEW CAMPUS
+        </div>
+        <div className="text-[6.5px] text-zinc-600">
+          INFORMATION SYSTEM STUDENT ORGANIZATION COUNCIL
+        </div>
+        <div className="text-sm font-extrabold tracking-widest text-emerald-900 mt-1 border-b border-emerald-800/30 pb-0.5 inline-block px-4">
+          CERTIFICATE OF PARTICIPATION
+        </div>
+      </div>
+      <div className="my-auto py-1">
+        <div className="text-[7.5px] text-zinc-600">This Certificate is Proudly Presented to</div>
+        <div className="font-serif-editorial italic text-lg sm:text-xl text-emerald-800 leading-tight my-0.5">
+          Girbaud Sky E. Villareal
+        </div>
+        <div className="text-[7.5px] font-bold text-zinc-800">
+          “Artificial Intelligence in Education: How Student Can Use AI Responsibly”
+        </div>
+        <div className="text-[6.5px] text-zinc-600 mt-0.5">
+          Given this 5th Day of February 2026 • Essential skills in AI literacy & digital innovation
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-1 text-[6px] text-zinc-700 border-t border-amber-500/30 pt-1.5">
+        <div>
+          <div className="font-bold text-emerald-950">Mr. Ryan Lyster Pascua</div>
+          <div>ISSOC President</div>
+        </div>
+        <div>
+          <div className="font-bold text-emerald-950">Ms. Cyrille Anne Nery, MSIT</div>
+          <div>ISSOC Advisor</div>
+        </div>
+        <div>
+          <div className="font-bold text-emerald-950">Mr. Julius Salonga, MSCS</div>
+          <div>IS Department Head</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  MULTI-PATH SMART CERTIFICATE IMAGE LOADER                                 */
+/* -------------------------------------------------------------------------- */
+function SmartCertImage({ candidates = [], certId, alt, className = '' }) {
+  const validCandidates = candidates.filter(Boolean);
+  const [idx, setIdx] = useState(0);
+  const [allFailed, setAllFailed] = useState(validCandidates.length === 0);
 
   useEffect(() => {
-    setCurrentSrc(src);
-    setUsedFallback(false);
-  }, [src]);
+    setIdx(0);
+    setAllFailed(validCandidates.length === 0);
+  }, [certId, validCandidates.length]);
+
+  if (allFailed) {
+    return <BuiltInCertificateDocument certId={certId} />;
+  }
 
   return (
     <img
-      src={currentSrc}
+      src={validCandidates[idx]}
       alt={alt}
       loading="lazy"
       onError={() => {
-        if (!usedFallback && fallbackSrc) {
-          setUsedFallback(true);
-          setCurrentSrc(fallbackSrc);
+        if (idx + 1 < validCandidates.length) {
+          setIdx(idx + 1);
+        } else {
+          setAllFailed(true);
         }
       }}
       className={className}
@@ -81,6 +246,9 @@ function SmartCertImage({ src, fallbackSrc, alt, className = '' }) {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/*  MAIN PORTFOLIO APPLICATION                                                */
+/* -------------------------------------------------------------------------- */
 export default function App() {
   const [isDark, setIsDark] = useState(() => {
     try {
@@ -92,9 +260,19 @@ export default function App() {
   });
 
   const baseUrl = import.meta.env.BASE_URL;
-  const portraitUrl = `${baseUrl}profile.jpg`;
-  const resumePdfUrl = `${baseUrl}resume.pdf`;
+  const bundledProfile = findBundledImage('profile');
+  const portraitCandidates = [
+    bundledProfile,
+    `${baseUrl}profile.jpg`,
+    `${baseUrl}profile.png`,
+    `${baseUrl}profile.jpeg`,
+    `${baseUrl}PROFILE.jpg`,
+    `${baseUrl}PROFILE.png`,
+  ].filter(Boolean);
+  const [portraitIdx, setPortraitIdx] = useState(0);
   const [photoError, setPhotoError] = useState(false);
+
+  const resumePdfUrl = `${baseUrl}resume.pdf`;
 
   const rotatingTitles = [
     "I'm Girbaud Sky",
@@ -116,7 +294,26 @@ export default function App() {
   const [cvFilter, setCvFilter] = useState('all');
   const [selectedSkill, setSelectedSkill] = useState(null);
 
-  /* Official Certifications Data (TESDANCII.png, CISCOCERT.jpg, NCBA.jpg) */
+  /* Helper that builds candidate URLs from both src/assets/ and public/ */
+  const buildCertCandidates = (baseName, keyword) => {
+    const bundled = findBundledImage(keyword);
+    const lower = baseName.toLowerCase();
+    const upper = baseName.toUpperCase();
+    return [
+      bundled,
+      `${baseUrl}${baseName}.png`,
+      `${baseUrl}${baseName}.jpg`,
+      `${baseUrl}${baseName}.jpeg`,
+      `${baseUrl}${lower}.png`,
+      `${baseUrl}${lower}.jpg`,
+      `${baseUrl}${upper}.PNG`,
+      `${baseUrl}${upper}.JPG`,
+      `${baseUrl}assets/${baseName}.png`,
+      `${baseUrl}assets/${baseName}.jpg`,
+    ].filter(Boolean);
+  };
+
+  /* Official Certifications Data */
   const certifications = [
     {
       id: 'tesda-ncii',
@@ -125,8 +322,7 @@ export default function App() {
       date: 'Issued Oct 22, 2026 • Valid until Oct 21, 2031',
       credentialId: 'Cert No. 26131402035012',
       badge: 'National Certificate II',
-      src: `${baseUrl}TESDANCII.png`,
-      fallbackSrc: `${baseUrl}TESDANCII.jpg`,
+      candidates: buildCertCandidates('TESDANCII', 'tesda'),
       description:
         'Certified in installing and configuring computer systems, setting up computer networks and servers, and maintaining and repairing enterprise computer systems and networks.',
       tags: ['Computer Systems', 'Computer Networks', 'Server Setup', 'System Maintenance'],
@@ -138,8 +334,7 @@ export default function App() {
       date: 'Completed Jan 31, 2026',
       credentialId: 'Instructor: John Philip Tan',
       badge: 'Cisco Verified',
-      src: `${baseUrl}CISCOCERT.jpg`,
-      fallbackSrc: `${baseUrl}CISCOCERT.png`,
+      candidates: buildCertCandidates('CISCOCERT', 'cisco'),
       description:
         'Successfully completed training in data science principles, analytics workflows, and modern data-driven decision systems.',
       tags: ['Data Science', 'Analytics', 'Cisco NetAcad', 'DICT-ITU'],
@@ -151,8 +346,7 @@ export default function App() {
       date: 'Given Feb 5, 2026',
       credentialId: 'ISSOC Webinar Series',
       badge: 'AI Literacy',
-      src: `${baseUrl}NCBA.jpg`,
-      fallbackSrc: `${baseUrl}NCBA.png`,
+      candidates: buildCertCandidates('NCBA', 'ncba'),
       description:
         'Recognized for active participation in essential AI literacy skills, ethical usage, and responsible exploration of AI in education and digital innovation.',
       tags: ['AI Literacy', 'Responsible AI', 'Digital Innovation'],
@@ -839,11 +1033,17 @@ export default function App() {
                 className="w-full max-w-[235px] sm:max-w-[265px] lg:max-w-[290px] p-3"
               >
                 <div className="relative rounded-2xl overflow-hidden aspect-[4/4.6] bg-gradient-to-b from-[#E5E0D8] to-[#D6CFC5] dark:from-[#262421] dark:to-[#1C1A17]">
-                  {!photoError ? (
+                  {!photoError && portraitCandidates.length > 0 ? (
                     <img
-                      src={portraitUrl}
+                      src={portraitCandidates[portraitIdx]}
                       alt="Girbaud Sky Villareal"
-                      onError={() => setPhotoError(true)}
+                      onError={() => {
+                        if (portraitIdx + 1 < portraitCandidates.length) {
+                          setPortraitIdx(portraitIdx + 1);
+                        } else {
+                          setPhotoError(true);
+                        }
+                      }}
                       className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-105"
                     />
                   ) : (
@@ -1076,9 +1276,10 @@ export default function App() {
               <div
                 onClick={() =>
                   setLightboxData({
+                    certId: 'phased',
                     title: 'PHASED — PHishing And Social Engineering Detection',
                     subtitle: 'Full UI Showcase',
-                    src: phasedImage,
+                    candidates: [phasedImage],
                   })
                 }
                 className="relative w-full cursor-zoom-in group"
@@ -1150,28 +1351,28 @@ export default function App() {
             </div>
           </AestheticCard>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AestheticCard isDark={isDark} className="p-6 sm:p-7 flex flex-col justify-between">
-              <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            <AestheticCard isDark={isDark} className="p-6 sm:p-7">
+              <div className="flex-1">
                 <h3 className={`font-display text-xl font-bold ${textMain}`}>Caiantrix Grocery System</h3>
                 <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
                   Redesigned the user interface for a retail grocery management system to streamline daily checkout operations and inventory tracking.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-inherit">
+              <div className={`flex flex-wrap gap-2 mt-5 pt-4 border-t ${borderLine}`}>
                 <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>System UI</span>
                 <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>Workflow UX</span>
               </div>
             </AestheticCard>
 
-            <AestheticCard isDark={isDark} className="p-6 sm:p-7 flex flex-col justify-between">
-              <div>
+            <AestheticCard isDark={isDark} className="p-6 sm:p-7">
+              <div className="flex-1">
                 <h3 className={`font-display text-xl font-bold ${textMain}`}>Casa Amelinda Resort</h3>
                 <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
                   Designed calm, responsive screen layouts in Figma for a clear and welcoming guest booking interface across mobile, tablet, and desktop.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-inherit">
+              <div className={`flex flex-wrap gap-2 mt-5 pt-4 border-t ${borderLine}`}>
                 <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>Figma Design</span>
                 <span className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>Hospitality UI</span>
               </div>
@@ -1311,7 +1512,7 @@ export default function App() {
           )}
 
           {(cvFilter === 'all' || cvFilter === 'education') && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
               <AestheticCard isDark={isDark} className="p-6 sm:p-7">
                 <div className="flex items-center justify-between mb-5">
                   <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
@@ -1350,8 +1551,8 @@ export default function App() {
                 </div>
               </AestheticCard>
 
-              <AestheticCard isDark={isDark} className="p-6 sm:p-7 flex flex-col justify-between gap-6">
-                <div>
+              <AestheticCard isDark={isDark} className="p-6 sm:p-7">
+                <div className="flex-1">
                   <div className="flex items-center justify-between mb-5">
                     <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
                       Community & Practicum
@@ -1388,7 +1589,7 @@ export default function App() {
 
                 <a
                   href="#certifications"
-                  className={`p-4 rounded-2xl border flex items-center justify-between transition-all hover:scale-[1.01] ${pillBg}`}
+                  className={`mt-6 p-4 rounded-2xl border flex items-center justify-between transition-all hover:scale-[1.01] ${pillBg}`}
                 >
                   <div>
                     <div className={`text-xs font-display font-bold ${textMain}`}>
@@ -1406,7 +1607,7 @@ export default function App() {
         </section>
 
         {/* ==================================================================== */}
-        {/*  SECTION 5: VERIFIED CERTIFICATIONS GALLERY ROOM                     */}
+        {/*  SECTION 5: VERIFIED CERTIFICATIONS GALLERY (ALIGNED BOTTOM BUTTONS) */}
         {/* ==================================================================== */}
         <section id="certifications" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-4 ${borderLine}`}>
@@ -1426,21 +1627,23 @@ export default function App() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {certifications.map((cert) => (
               <AestheticCard
                 key={cert.id}
                 isDark={isDark}
-                className="p-4 sm:p-5 flex flex-col justify-between group"
+                className="p-4 sm:p-5 group"
               >
-                <div>
+                {/* Top & Middle Content (Grows to fill space so footers align) */}
+                <div className="flex-1 flex flex-col">
+                  {/* Certificate Preview Frame */}
                   <div
                     onClick={() =>
                       setLightboxData({
+                        certId: cert.id,
                         title: cert.title,
                         subtitle: `${cert.issuer} • ${cert.date}`,
-                        src: cert.src,
-                        fallbackSrc: cert.fallbackSrc,
+                        candidates: cert.candidates,
                       })
                     }
                     className={`relative w-full h-56 sm:h-60 rounded-2xl overflow-hidden border p-3 flex items-center justify-center cursor-zoom-in transition-all ${
@@ -1450,8 +1653,8 @@ export default function App() {
                     }`}
                   >
                     <SmartCertImage
-                      src={cert.src}
-                      fallbackSrc={cert.fallbackSrc}
+                      candidates={cert.candidates}
+                      certId={cert.id}
                       alt={cert.title}
                       className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                     />
@@ -1462,9 +1665,10 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="mt-4 space-y-2">
+                  {/* Certificate Details */}
+                  <div className="mt-4 space-y-2 flex-1 flex flex-col">
                     <div className="flex items-center justify-between gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${sageBadge}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${sageBadge}`}>
                         {cert.badge}
                       </span>
                       <span className={`text-[11px] font-medium truncate ${textSoft}`}>
@@ -1482,10 +1686,14 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className={`mt-5 pt-3.5 border-t space-y-3 ${borderLine}`}>
-                  <div className="flex flex-wrap gap-1.5">
+                {/* Bottom Anchored Footer: Tags + Aligned View Full Certificate Button */}
+                <div className={`mt-6 pt-4 border-t flex flex-col justify-end gap-3.5 ${borderLine}`}>
+                  <div className="flex flex-wrap gap-1.5 min-h-[52px] content-start">
                     {cert.tags.map((tag) => (
-                      <span key={tag} className={`px-2.5 py-0.5 rounded-full text-[10px] border ${pillBg}`}>
+                      <span
+                        key={tag}
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] border ${pillBg}`}
+                      >
                         {tag}
                       </span>
                     ))}
@@ -1495,13 +1703,13 @@ export default function App() {
                     type="button"
                     onClick={() =>
                       setLightboxData({
+                        certId: cert.id,
                         title: cert.title,
                         subtitle: `${cert.issuer} • ${cert.date}`,
-                        src: cert.src,
-                        fallbackSrc: cert.fallbackSrc,
+                        candidates: cert.candidates,
                       })
                     }
-                    className={`w-full py-2 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-1.5 ${pillBg} hover:opacity-90`}
+                    className={`w-full py-2.5 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-1.5 ${pillBg} hover:opacity-90`}
                   >
                     <span>View Full Certificate</span>
                     <span>⤢</span>
@@ -1526,7 +1734,7 @@ export default function App() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-stretch">
             <AestheticCard isDark={isDark} className="p-6">
               <div className={`font-serif-editorial italic text-2xl mb-1 ${textMain}`}>01. UI/UX & Visuals</div>
               <p className={`text-xs mb-4 ${textSoft}`}>Human-centered design & branding</p>
@@ -1756,17 +1964,17 @@ export default function App() {
           </div>
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-5xl w-full max-h-[84vh] overflow-y-auto rounded-2xl bg-black/40 p-2 flex items-center justify-center"
+            className="max-w-5xl w-full max-h-[84vh] overflow-y-auto rounded-2xl bg-black/40 p-4 flex items-center justify-center"
           >
             <SmartCertImage
-              src={lightboxData.src}
-              fallbackSrc={lightboxData.fallbackSrc}
+              candidates={lightboxData.candidates}
+              certId={lightboxData.certId}
               alt={lightboxData.title}
-              className="max-w-full max-h-[80vh] w-auto h-auto object-contain rounded-xl shadow-2xl mx-auto"
+              className="max-w-full max-h-[78vh] w-auto h-auto object-contain rounded-xl shadow-2xl mx-auto"
             />
           </div>
         </div>
       )}
     </div>
   );
-}
+} 
