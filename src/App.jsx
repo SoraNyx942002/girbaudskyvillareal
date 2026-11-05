@@ -614,10 +614,12 @@ export default function App() {
 
   const resumePdfUrl = `${baseUrl}resume.pdf`;
 
+  /* Updated Rotating Titles Including Property Management & Tech Executive */
   const rotatingTitles = [
     "I'm Girbaud Sky",
     "I'm a Front-End Developer",
     "I'm a UI/UX Designer",
+    "I'm a Property Host & Tech Exec",
   ];
   const [titleIndex, setTitleIndex] = useState(0);
   const [isTitleFading, setIsTitleFading] = useState(false);
@@ -628,12 +630,11 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [openProcessIdx, setOpenProcessIdx] = useState(0);
-  const [openExpIds, setOpenExpIds] = useState(['villman', 'undecide']);
+  const [openExpIds, setOpenExpIds] = useState(['villman', 'arca-host', 'undecide']);
   const [phasedView, setPhasedView] = useState('live');
 
-  /* Airbnb & Facebook Condo Hosting Room State */
-  const [hostingTab, setHostingTab] = useState('airbnb'); // 'airbnb' | 'facebook' | 'live-embed'
-  const [embedTarget, setEmbedTarget] = useState('facebook'); // 'facebook' | 'airbnb'
+  /* PHASED-Style Airbnb & Facebook Showcase State */
+  const [arcaView, setArcaView] = useState('airbnb-live'); // 'airbnb-live' | 'facebook-live' | 'inclusions' | 'role'
 
   /* Horizontal UI Carousel State & Ref */
   const [uiCategoryFilter, setUiCategoryFilter] = useState('all');
@@ -659,7 +660,7 @@ export default function App() {
   const facebookPageUrl = 'https://www.facebook.com/profile.php?id=61594962617625';
   const facebookPluginIframeSrc = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
     facebookPageUrl
-  )}&tabs=timeline&width=500&height=560&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`;
+  )}&tabs=timeline&width=500&height=540&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`;
 
   /* ------------------------------------------------------------------------ */
   /*  UI DESIGN WORKS DATA (HORIZONTAL CAROUSEL SHOWCASE)                     */
@@ -788,7 +789,6 @@ export default function App() {
       ? uiDesignWorks
       : uiDesignWorks.filter((w) => w.category === uiCategoryFilter);
 
-  /* Carousel Scroll Helpers */
   const scrollToUiSlide = (index) => {
     if (!uiCarouselRef.current || filteredUiWorks.length === 0) return;
     const boundedIdx = Math.max(0, Math.min(index, filteredUiWorks.length - 1));
@@ -1082,7 +1082,7 @@ export default function App() {
       title: 'Empathize & Discover',
       subtitle: 'Understanding human & operational needs',
       description:
-        'Every effective product starts with active listening. Drawing from my experience in client consultation and technical sales, I map real user pain points, business goals, and daily workflows before sketching a single screen.',
+        'Every effective product starts with active listening. Drawing from my experience in client consultation, property guest relations, and technical sales, I map real user pain points, business goals, and daily workflows before sketching a single screen.',
       deliverables: ['Stakeholder Interviews', 'Workflow Auditing', 'Information Architecture'],
     },
     {
@@ -1128,16 +1128,17 @@ export default function App() {
     },
     {
       id: 'arca-host',
-      role: 'Property Manager & Airbnb Host',
-      company: 'Cozy Studio in ARCA South (Avida Towers Vireo)',
+      role: 'Property Manager & Airbnb Host (Guest Relations)',
+      company: 'Cozy Studio in ARCA South — Avida Towers Vireo',
       location: 'ARCA South, Taguig City',
       period: '2026 — Present',
       active: true,
       highlights: [
-        'Oversee end-to-end guest relations, tenant screening, and long-term residential lease management for a fully furnished studio unit in Tower 1.',
-        'Act as primary liaison with Airbnb Support and building administration (PMO) to resolve platform, billing, and compliance inquiries swiftly.',
+        'Client Engagement: Serve as the primary point of contact for all guest and tenant inquiries across Airbnb, Facebook Page, Viber, and WhatsApp—screening long-term tenants and ensuring professional communication from booking through checkout.',
+        'Issue Resolution: Act as the direct liaison with Airbnb Support and building property management (PMO) to swiftly troubleshoot platform, billing, contract, or policy issues.',
+        'Lease & Marketing Administration: Manage the verified Airbnb virtual tour listing and official Facebook leasing page for a fully furnished 23 sqm studio in Tower 1.',
       ],
-      tags: ['Property Management', 'Guest Relations', 'Client Consultation', 'Issue Resolution', 'Lease Administration'],
+      tags: ['Property Management', 'Guest Relations', 'Client Engagement', 'Issue Resolution', 'Airbnb Hosting', 'Lease Administration'],
     },
     {
       id: 'undecide',
@@ -1317,7 +1318,7 @@ export default function App() {
                 Girbaud Sky Villareal
               </span>
               <span className={`text-[10px] sm:text-[11px] hidden sm:block truncate ${textSoft}`}>
-                UI/UX • Front-End • Tech Executive
+                UI/UX • Front-End • Tech Exec • Property Host
               </span>
             </div>
           </a>
@@ -1415,7 +1416,7 @@ export default function App() {
                 { id: 'process', label: 'Design Process' },
                 { id: 'work', label: 'Featured System (PHASED)' },
                 { id: 'ui-works', label: 'UI Design Works Carousel (5)' },
-                { id: 'hosting', label: 'Airbnb Condo & FB Page Preview' },
+                { id: 'hosting', label: 'Airbnb Condo & FB Page Showcase' },
                 { id: 'experience', label: 'Experience & Resume/CV' },
                 { id: 'certifications', label: 'Verified Certifications (3)' },
                 { id: 'capabilities', label: 'Capabilities & Skills' },
@@ -1464,10 +1465,10 @@ export default function App() {
               <div className="reveal flex flex-wrap items-center gap-2.5">
                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium border ${sageBadge}`}>
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Available for UI/UX, Front-End & Technical Roles
+                  Available for UI/UX, Front-End, Tech & Property Operations
                 </span>
                 <span className={`text-xs ${textSoft}`}>
-                  Quezon City, PH {timeString && `• ${timeString}`}
+                  Quezon City & Taguig, PH {timeString && `• ${timeString}`}
                 </span>
               </div>
 
@@ -1493,10 +1494,10 @@ export default function App() {
                 </div>
 
                 <p className={`text-sm sm:text-base lg:text-lg leading-relaxed max-w-2xl ${textSub}`}>
-                  With a foundation in Information Technology, commercial illustration, and technical executive operations, I bridge{' '}
+                  With a foundation in Information Technology, commercial illustration, technical executive operations, and residential property management, I bridge{' '}
                   <strong className={`font-semibold ${textMain}`}>thoughtful user interface design</strong>,{' '}
                   <strong className={`font-semibold ${textMain}`}>clean React & MERN engineering</strong>, and{' '}
-                  <strong className={`font-semibold ${textMain}`}>clear client communication</strong> — turning complex systems into calm, intuitive digital experiences.
+                  <strong className={`font-semibold ${textMain}`}>high-trust client & guest relations</strong> — turning complex systems and living spaces into calm, seamless experiences.
                 </p>
               </div>
 
@@ -1531,7 +1532,7 @@ export default function App() {
                   >
                     <div className="truncate pr-2">
                       <div className={`text-xs font-semibold ${textMain}`}>+63 920 629 0342</div>
-                      <div className={`text-[11px] ${textSoft}`}>Bagong Pag-Asa, QC</div>
+                      <div className={`text-[11px] ${textSoft}`}>Viber / WhatsApp / SMS</div>
                     </div>
                     <span className={`text-[11px] px-2.5 py-1 rounded-full border shrink-0 ${pillBg}`}>
                       {copiedLabel === 'phone number' ? 'Copied' : 'Copy'}
@@ -1619,7 +1620,7 @@ export default function App() {
                         Girbaud Sky Villareal
                       </span>
                       <span className={`text-[11px] mt-0.5 ${textSoft}`}>
-                        UI/UX & Front-End
+                        UI/UX • Dev • Host
                       </span>
                     </div>
                   )}
@@ -1630,7 +1631,7 @@ export default function App() {
                         Girbaud Sky Villareal
                       </div>
                       <div className="text-[10px] text-white/75 truncate">
-                        BSIT ’26 • Quezon City
+                        BSIT ’26 • Designer, Dev & Host
                       </div>
                     </div>
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-2" />
@@ -1647,8 +1648,8 @@ export default function App() {
                     <div className={`text-[9px] mt-0.5 ${textSoft}`}>QCU ’26</div>
                   </div>
                   <div className={`py-2 px-1 rounded-xl border ${pillBg}`}>
-                    <div className={`font-serif-editorial italic text-base leading-none ${textMain}`}>NC II</div>
-                    <div className={`text-[9px] mt-0.5 ${textSoft}`}>TESDA CSS</div>
+                    <div className={`font-serif-editorial italic text-base leading-none ${textMain}`}>Host</div>
+                    <div className={`text-[9px] mt-0.5 ${textSoft}`}>ARCA South</div>
                   </div>
                 </div>
               </AestheticCard>
@@ -2163,509 +2164,562 @@ export default function App() {
         </section>
 
         {/* ==================================================================== */}
-        {/*  SECTION 5: AIRBNB CONDO LISTING & FACEBOOK PAGE PREVIEW STUDIO      */}
+        {/*  SECTION 5: PHASED-STYLE FLAGSHIP SHOWCASE FOR AIRBNB & FB LEASING   */}
         {/* ==================================================================== */}
         <section id="hosting" className="reveal space-y-8 scroll-mt-24">
-          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b pb-5 ${borderLine}`}>
+          <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b pb-4 ${borderLine}`}>
             <div>
               <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
                 04 / Property Management, Hosting & Guest Relations
               </span>
               <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
-                Cozy Studio in{' '}
+                Featured{' '}
                 <span className="font-serif-editorial italic font-normal text-3xl sm:text-5xl">
-                  ARCA South
+                  property & leasing hub
                 </span>
               </h2>
-              <p className={`text-xs sm:text-sm mt-1.5 max-w-2xl ${textSub}`}>
-                Avida Towers Vireo, ARCA South, City of Taguig, Philippines •{' '}
-                <strong className={textMain}>
-                  Entire Condo · 2 Guests · 1 Bedroom · 1 Bed · 1 Bath (23 sqm Tower 1)
-                </strong>
-              </p>
             </div>
-
-            {/* Single-Line Platform Preview Switcher */}
-            <div
-              className={`inline-flex items-center flex-nowrap gap-1 p-1.5 rounded-full border overflow-x-auto max-w-full no-scrollbar self-start ${pillBg}`}
-            >
-              {[
-                { id: 'airbnb', label: '🏠 Airbnb Listing Preview' },
-                { id: 'facebook', label: '📘 Facebook Page & Lease Post' },
-                { id: 'live-embed', label: '🌐 Live Interactive Embed' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setHostingTab(tab.id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap shrink-0 ${
-                    hostingTab === tab.id
-                      ? isDark
-                        ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
-                        : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
-                      : `${textSub} hover:${textMain}`
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+            <span className={`text-xs ${textSoft}`}>
+              Switch between Airbnb Preview, Live Facebook Page, Inclusions & My Role
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-stretch">
-            {/* LEFT COLUMN (7 COLS): INTERACTIVE PREVIEW STAGE (AIRBNB / FACEBOOK / EMBED) */}
-            <div className="lg:col-span-7 flex flex-col">
-              <AestheticCard isDark={isDark} className="overflow-hidden flex flex-col justify-between">
-                {/* Browser Top Chrome Bar */}
-                <div
-                  className={`px-4 py-3 border-b flex flex-wrap items-center justify-between gap-2 ${
-                    isDark ? 'bg-[#141311] border-[#2E2C29]' : 'bg-[#F3F1EC] border-[#E5E2DC]'
-                  }`}
+          {/* PHASED-ARCHITECTURAL FLAGSHIP CARD (ENHANCED WITH FULL EXECUTIVE DETAILS) */}
+          <AestheticCard isDark={isDark} className="overflow-hidden">
+            
+            {/* 1. TOP STUDIO HEADER BAR (Matches PHASED Layout) */}
+            <div className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-3 ${borderLine}`}>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border ${sageBadge}`}>
+                  ARCA SOUTH CONDO
+                </span>
+                <span className={`text-xs font-medium ${textSub}`}>
+                  <strong>Avida Towers Vireo</strong> (Tower 1 · 23 sqm) • Entire Condo · 2 Guests · 1 Bedroom · 1 Bed · 1 Bath
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Strictly Single-Line Mode Switcher */}
+                <div className={`inline-flex items-center flex-nowrap p-1 rounded-full border overflow-x-auto max-w-full no-scrollbar ${pillBg}`}>
+                  {[
+                    { id: 'airbnb-live', label: 'Airbnb Listing Preview' },
+                    { id: 'facebook-live', label: 'Live Facebook Page' },
+                    { id: 'inclusions', label: 'Full Lease & Amenities' },
+                    { id: 'role', label: 'My Role & Management' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setArcaView(tab.id)}
+                      className={`px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+                        arcaView === tab.id
+                          ? isDark
+                            ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
+                            : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
+                          : `${textSub} hover:${textMain}`
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Direct External Launch Buttons */}
+                <a
+                  href={airbnbEditorUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-display font-semibold bg-[#FF385C] text-white hover:opacity-95 transition-all shadow-sm whitespace-nowrap"
                 >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80 shrink-0" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80 shrink-0" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80 shrink-0" />
-                    <span className="ml-2 text-[11px] font-medium truncate opacity-80">
-                      {hostingTab === 'airbnb'
-                        ? 'airbnb.com/h/cozystudioarcasouth'
-                        : hostingTab === 'facebook'
-                        ? 'facebook.com/profile.php?id=61594962617625'
-                        : 'Live Platform Preview Window'}
+                  <span>Preview on Airbnb</span>
+                  <span>↗</span>
+                </a>
+                <a
+                  href={facebookPageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-display font-semibold bg-[#1877F2] text-white hover:opacity-95 transition-all shadow-sm whitespace-nowrap"
+                >
+                  <span>Facebook Page</span>
+                  <span>↗</span>
+                </a>
+              </div>
+            </div>
+
+            {/* 2. MAIN INTERACTIVE PREVIEW STAGE (Full-Width Like PHASED) */}
+            {arcaView === 'airbnb-live' && (
+              <div className={`relative w-full ${isDark ? 'bg-[#131210]' : 'bg-[#F7F5F0]'}`}>
+                {/* Simulated Browser URL Bar for Airbnb */}
+                <div className={`px-4 py-2 border-b flex flex-wrap items-center justify-between gap-2 text-[11px] ${borderLine}`}>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="w-2 h-2 rounded-full bg-[#FF385C] animate-pulse shrink-0" />
+                    <span className="font-mono opacity-75 truncate">
+                      https://www.airbnb.com/h/cozystudioarcasouth • Host Editor ID: 1790979755480894562
                     </span>
                   </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
                     <a
                       href={airbnbPublicUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1 rounded-full text-[11px] font-semibold bg-[#FF385C] text-white hover:opacity-90 transition-opacity"
+                      className="underline font-semibold text-[#FF385C]"
                     >
-                      Airbnb ↗
+                      Virtual Tour Link ↗
                     </a>
                     <a
-                      href={facebookPageUrl}
+                      href={airbnbEditorUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1 rounded-full text-[11px] font-semibold bg-[#1877F2] text-white hover:opacity-90 transition-opacity"
+                      className={`underline font-semibold ${textMain}`}
                     >
-                      Facebook Page ↗
+                      Host Editor Space ↗
                     </a>
                   </div>
                 </div>
 
-                {/* TAB 1: AIRBNB LISTING INTERACTIVE PREVIEW */}
-                {hostingTab === 'airbnb' && (
-                  <div className="p-5 sm:p-6 space-y-5 flex-1 flex flex-col justify-between overflow-y-auto max-h-[560px]">
-                    <div className="space-y-4">
-                      {/* Listing Title Banner */}
-                      <div
-                        className={`p-4 sm:p-5 rounded-2xl border relative overflow-hidden ${
-                          isDark ? 'bg-[#141311] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
-                        }`}
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#FF385C]/15 text-[#FF385C] border border-[#FF385C]/30">
-                            Verified Airbnb Listing
-                          </span>
-                          <span className={`text-xs font-semibold ${textMain}`}>
-                            ₱19,000 / month • Long-Term Ready
-                          </span>
-                        </div>
-
-                        <h3 className={`font-display text-xl sm:text-2xl font-bold ${textMain}`}>
+                {/* Split Interactive Airbnb Showcase + Live Embed Stage */}
+                <div className="grid grid-cols-1 lg:grid-cols-12">
+                  {/* Left (7 Cols): Interactive Airbnb Listing Showcase Window */}
+                  <div className={`lg:col-span-7 p-5 sm:p-7 space-y-5 border-b lg:border-b-0 lg:border-r ${borderLine}`}>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#FF385C]/15 text-[#FF385C] border border-[#FF385C]/30 mb-2">
+                          ★ Verified Airbnb Host Listing
+                        </span>
+                        <h3 className={`font-display text-2xl sm:text-3xl font-bold tracking-tight ${textMain}`}>
                           Cozy Studio in ARCA South
                         </h3>
-                        <p className={`text-xs mt-1 ${textSub}`}>
-                          Avida Towers Vireo, South Union Drive, ARCA South, Taguig City
-                        </p>
-
-                        {/* Space Specs Pills */}
-                        <div className="flex flex-wrap gap-1.5 mt-3.5">
-                          {[
-                            'Entire Condo',
-                            '2 Guests Max',
-                            '1 Bedroom (Partitioned)',
-                            '1 Queen Bed',
-                            '1 Private Bath',
-                            '23 sqm • Tower 1',
-                          ].map((spec) => (
-                            <span
-                              key={spec}
-                              className={`px-2.5 py-1 rounded-full text-[11px] font-medium border ${pillBg}`}
-                            >
-                              {spec}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Overview */}
-                      <div className="space-y-1.5">
-                        <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
-                          Listing Overview
-                        </div>
-                        <p className={`text-xs sm:text-sm leading-relaxed ${textSub}`}>
-                          Situated in the premier, highly accessible lifestyle and business district of ARCA South, this newly listed entire studio condo offers a seamless blend of modern comfort and urban convenience. Designed specifically with long-term residents and young professionals in mind, the space features an optimized layout that maximizes both functionality and style.
+                        <p className={`text-xs sm:text-sm mt-1 ${textSub}`}>
+                          Avida Towers Vireo, South Union Drive, ARCA South, City of Taguig, Philippines
                         </p>
                       </div>
 
-                      {/* Space & Amenities 2x2 Grid */}
-                      <div className="space-y-2">
-                        <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
-                          Space & Amenities
+                      <div className={`p-3 rounded-2xl border text-right shrink-0 ${ isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0] shadow-sm' }`}>
+                        <div className={`font-display font-extrabold text-lg sm:text-xl ${textMain}`}>
+                          ₱19,000 <span className="text-xs font-normal opacity-70">/ month</span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {[
-                            {
-                              title: 'Fully Furnished Interiors',
-                              desc: 'Thoughtfully decorated with modern wall art, warm pendant lighting, a loveseat, plush rug, and contemporary finishes.',
-                            },
-                            {
-                              title: 'Equipped Kitchen',
-                              desc: 'Samsung sleek black refrigerator, microwave, induction cooker, electric kettle, rice cooker, built-in sink, and wood-finish cabinetry.',
-                            },
-                            {
-                              title: 'Dedicated Dining & Workspace',
-                              desc: 'Space-saving dining bar counter with seating for two and aesthetic pendant lights — ideal for meals or remote work.',
-                            },
-                            {
-                              title: 'Smartly Partitioned Layout',
-                              desc: 'Stylish slatted room divider separates the queen-sized sleeping quarters and wardrobe from the main living area.',
-                            },
-                          ].map((item) => (
-                            <div
-                              key={item.title}
-                              className={`p-3.5 rounded-2xl border ${
-                                isDark
-                                  ? 'bg-[#141311]/90 border-[#2E2C29]'
-                                  : 'bg-[#FAF8F5] border-[#E7E5E0]'
-                              }`}
-                            >
-                              <div className={`font-display font-bold text-xs sm:text-sm ${textMain}`}>
-                                {item.title}
-                              </div>
-                              <p className={`text-[11px] leading-relaxed mt-1 ${textSub}`}>
-                                {item.desc}
-                              </p>
-                            </div>
-                          ))}
+                        <div className="text-[10px] text-emerald-500 font-semibold">
+                          Inclusive of Assoc. Dues
                         </div>
-                      </div>
-
-                      {/* Leasing Terms Box */}
-                      <div className={`p-3.5 rounded-2xl border ${sageBadge}`}>
-                        <div className="font-display font-bold text-xs">
-                          Leasing Terms (1-Year Residential Lease)
-                        </div>
-                        <p className="text-[11px] leading-relaxed mt-1 opacity-90">
-                          Tailored for extended stays and long-term residential leasing (ideal for 1-year terms at ₱19,000/month inclusive of association dues). Utilities (water and electricity) are billed separately based on actual meter consumption.
-                        </p>
                       </div>
                     </div>
 
-                    {/* Dual Airbnb Action Buttons */}
-                    <div className={`pt-4 border-t flex flex-wrap items-center gap-2.5 ${borderLine}`}>
-                      <a
-                        href={airbnbPublicUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex-1 min-w-[200px] py-2.5 px-4 rounded-xl text-xs font-display font-semibold bg-[#FF385C] text-white hover:opacity-95 transition-all text-center shadow-sm"
-                      >
-                        Preview on Airbnb (airbnb.com/h/cozystudioarcasouth) ↗
-                      </a>
-                      <a
-                        href={airbnbEditorUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`py-2.5 px-4 rounded-xl text-xs font-display font-semibold border transition-all text-center ${pillBg}`}
-                      >
-                        Host Listing View ↗
-                      </a>
+                    {/* Space Capacity Bar */}
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+                      {[
+                        { label: 'Type', val: 'Entire Condo' },
+                        { label: 'Capacity', val: '2 Guests' },
+                        { label: 'Layout', val: '1 Bedroom' },
+                        { label: 'Sleeping', val: '1 Queen Bed' },
+                        { label: 'Bathroom', val: '1 Private Bath' },
+                      ].map((sp) => (
+                        <div
+                          key={sp.label}
+                          className={`p-2.5 rounded-xl border ${
+                            isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
+                          }`}
+                        >
+                          <div className={`text-[10px] ${textSoft}`}>{sp.label}</div>
+                          <div className={`font-display font-bold text-xs mt-0.5 ${textMain}`}>
+                            {sp.val}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 4 Core Space & Amenity Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                        <div className={`font-display font-bold text-xs sm:text-sm ${textMain}`}>
+                          ✦ Fully Furnished Interiors
+                        </div>
+                        <p className={`text-xs leading-relaxed mt-1 ${textSub}`}>
+                          Thoughtfully decorated with modern wall art, warm pendant lighting, a cozy loveseat, plush rug, and contemporary finishes.
+                        </p>
+                      </div>
+                      <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                        <div className={`font-display font-bold text-xs sm:text-sm ${textMain}`}>
+                          ✦ Equipped Kitchen
+                        </div>
+                        <p className={`text-xs leading-relaxed mt-1 ${textSub}`}>
+                          Sleek black Samsung refrigerator, microwave, induction cooker, electric kettle, rice cooker, built-in sink, and wood-finish cabinetry.
+                        </p>
+                      </div>
+                      <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                        <div className={`font-display font-bold text-xs sm:text-sm ${textMain}`}>
+                          ✦ Dedicated Dining & Workspace
+                        </div>
+                        <p className={`text-xs leading-relaxed mt-1 ${textSub}`}>
+                          Space-saving dining counter with seating for two and aesthetic pendant lights—ideal for meals or working from home.
+                        </p>
+                      </div>
+                      <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                        <div className={`font-display font-bold text-xs sm:text-sm ${textMain}`}>
+                          ✦ Smartly Partitioned Layout
+                        </div>
+                        <p className={`text-xs leading-relaxed mt-1 ${textSub}`}>
+                          Stylish slatted room divider visually separates the queen-sized sleeping quarters from the living area within a 23 sqm footprint.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                {/* TAB 2: FACEBOOK PAGE & FULL LEASE POST PREVIEW */}
-                {hostingTab === 'facebook' && (
-                  <div className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between overflow-y-auto max-h-[560px]">
-                    {/* Simulated Facebook Page Header */}
-                    <div
-                      className={`p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 ${
-                        isDark ? 'bg-[#141311] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-full bg-[#1877F2] text-white font-display font-bold text-base flex items-center justify-center shadow-sm shrink-0">
-                          f
+                  {/* Right (5 Cols): Live Airbnb Reservation & Virtual Tour Action Card */}
+                  <div className="lg:col-span-5 p-5 sm:p-7 flex flex-col justify-between space-y-5">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
+                          Interactive Booking & Tour Card
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                          ● Ready for Occupancy
+                        </span>
+                      </div>
+
+                      <div className={`p-4 rounded-2xl border space-y-3 ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0] shadow-sm'}`}>
+                        <div className="grid grid-cols-2 gap-2 border-b pb-3 border-stone-500/20 text-xs">
+                          <div>
+                            <div className="text-[10px] uppercase opacity-60">Tower & Size</div>
+                            <div className="font-bold mt-0.5">Tower 1 • 23 sqm Studio</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase opacity-60">Preferred Term</div>
+                            <div className="font-bold mt-0.5">1-Year Residential Lease</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className={`font-display font-bold text-sm sm:text-base ${textMain}`}>
-                            Cozy Studio in ARCA South — Official Facebook Page
+
+                        <div className="space-y-1.5 text-xs">
+                          <div className="flex justify-between">
+                            <span className={textSub}>Monthly Base Rate</span>
+                            <span className={`font-bold ${textMain}`}>₱19,000 / mo</span>
                           </div>
-                          <div className={`text-[11px] ${textSoft}`}>
-                            Property Management & Long-Term Leasing • Avida Towers Vireo, Taguig
+                          <div className="flex justify-between">
+                            <span className={textSub}>Association Dues</span>
+                            <span className="text-emerald-500 font-semibold">Included ✓</span>
                           </div>
+                          <div className="flex justify-between">
+                            <span className={textSub}>Move-In Terms</span>
+                            <span className={textMain}>1 Mo Adv + 2 Mos Dep (PDCs)</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={textSub}>Utilities (Water & Elec)</span>
+                            <span className={textSub}>Billed by meter consumption</span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 space-y-2">
+                          <a
+                            href={airbnbEditorUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-full py-2.5 px-4 rounded-xl text-xs font-display font-bold bg-[#FF385C] text-white hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-md"
+                          >
+                            <span>[ Preview on Airbnb — View Your Space ]</span>
+                            <span>↗</span>
+                          </a>
+                          <a
+                            href={airbnbPublicUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`w-full py-2.5 px-4 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-2 ${pillBg}`}
+                          >
+                            <span>Take Virtual Tour (airbnb.com/h/cozystudioarcasouth)</span>
+                            <span>↗</span>
+                          </a>
                         </div>
                       </div>
+
+                      <div className={`p-3.5 rounded-2xl border text-[11px] leading-relaxed ${sageBadge}`}>
+                        <strong>Fee-Saving Tip for 1-Year Tenants:</strong> To avoid Airbnb platform service fees for long-term stays, message directly via our Facebook Page, Viber (<code>09206290342</code>), or WhatsApp to process your 1-year lease and PDC payments.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MODE 2: LIVE FACEBOOK PAGE TIMELINE PLUGIN + PINNED LEASE ANNOUNCEMENT */}
+            {arcaView === 'facebook-live' && (
+              <div className={`w-full ${isDark ? 'bg-[#131210]' : 'bg-[#F7F5F0]'}`}>
+                <div className={`px-4 py-2 border-b flex flex-wrap items-center justify-between gap-2 text-[11px] ${borderLine}`}>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="w-2 h-2 rounded-full bg-[#1877F2] animate-pulse shrink-0" />
+                    <span className="font-mono opacity-75 truncate">
+                      https://www.facebook.com/profile.php?id=61594962617625
+                    </span>
+                  </div>
+                  <a
+                    href={facebookPageUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline font-semibold text-[#1877F2] shrink-0"
+                  >
+                    Open Official Facebook Page in New Tab ↗
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+                  {/* Left (5 Cols): Live Embedded Facebook Page Plugin Iframe */}
+                  <div className={`lg:col-span-5 p-4 sm:p-6 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r ${borderLine}`}>
+                    <div className="w-full max-w-[460px] rounded-2xl overflow-hidden border border-stone-500/20 bg-white shadow-lg">
+                      <iframe
+                        src={facebookPluginIframeSrc}
+                        title="Official Facebook Leasing Page Live Preview"
+                        className="w-full h-[480px] border-0 block"
+                        loading="lazy"
+                        allow="encrypted-media"
+                      />
+                    </div>
+                    <div className="mt-3 text-center">
                       <a
                         href={facebookPageUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-1.5 rounded-full text-xs font-display font-semibold bg-[#1877F2] text-white hover:opacity-90 transition-opacity"
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-display font-semibold bg-[#1877F2] text-white hover:opacity-95 shadow-sm"
                       >
-                        Open Facebook Page ↗
+                        <span>Message Us on Facebook</span>
+                        <span>↗</span>
                       </a>
                     </div>
+                  </div>
 
-                    {/* Full Formatted Lease Listing Post */}
-                    <div
-                      className={`p-4 sm:p-5 rounded-2xl border space-y-4 text-xs leading-relaxed ${
-                        isDark ? 'bg-[#141311]/90 border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
-                      }`}
-                    >
-                      <div className={`font-display font-bold text-sm sm:text-base ${textMain}`}>
-                        FOR LEASE: Fully Furnished Studio in Avida Towers Vireo – ARCA South
-                      </div>
-                      <p className={textSub}>
-                        Looking for a stylish and hassle-free home in Taguig? Our modern 23 sqm studio unit in Tower 1 is ready for long-term residential leasing! At <strong>₱19,000</strong>, enjoy a fully equipped space that gives you far more value than standard bare units in the area.
-                      </p>
+                  {/* Right (7 Cols): Scrollable Full "FOR LEASE" Announcement Post */}
+                  <div className="lg:col-span-7 p-5 sm:p-7 max-h-[540px] overflow-y-auto space-y-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#1877F2]/15 text-[#1877F2] border border-[#1877F2]/30">
+                        Pinned Facebook Leasing Announcement
+                      </span>
+                      <span className={`text-xs ${textSoft}`}>Tower 1 • 23 sqm Studio</span>
+                    </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <div className={`p-2.5 rounded-xl border ${pillBg}`}>
-                          <div className="text-[10px] opacity-70">Rental Rate</div>
-                          <div className="font-bold text-xs">₱19,000 / mo (Inc. Assoc Dues)</div>
-                        </div>
-                        <div className={`p-2.5 rounded-xl border ${pillBg}`}>
-                          <div className="text-[10px] opacity-70">Lease Term</div>
-                          <div className="font-bold text-xs">Minimum 1-Year Contract</div>
-                        </div>
-                        <div className={`p-2.5 rounded-xl border ${pillBg}`}>
-                          <div className="text-[10px] opacity-70">Capacity</div>
-                          <div className="font-bold text-xs">Maximum of 2 Occupants</div>
-                        </div>
-                      </div>
+                    <h3 className={`font-display text-lg sm:text-xl font-bold ${textMain}`}>
+                      FOR LEASE: Fully Furnished Studio in Avida Towers Vireo – ARCA South
+                    </h3>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                        <div>
-                          <div className={`font-display font-bold text-xs mb-1.5 ${textMain}`}>
-                            UNIT INCLUSIONS (Fully Furnished):
-                          </div>
-                          <ul className={`space-y-1 ${textSub}`}>
-                            <li>• Smartly partitioned sleeping area with queen-sized bed & wardrobe</li>
-                            <li>• Cozy living space with loveseat and plush rug</li>
-                            <li>• Dedicated dining bar/workspace with pendant lights</li>
-                            <li>• Equipped kitchen (Samsung fridge, microwave, induction cooker, kettle, rice cooker)</li>
-                            <li>• Private bathroom with shower</li>
-                          </ul>
-                        </div>
+                    <p className={`text-xs sm:text-sm leading-relaxed ${textSub}`}>
+                      Looking for a stylish and hassle-free home in Taguig? Our modern 23 sqm studio unit in Tower 1 is ready for long-term residential leasing! At <strong>₱19,000</strong>, enjoy a fully equipped space that gives you far more value than standard bare units in the area.
+                    </p>
 
-                        <div>
-                          <div className={`font-display font-bold text-xs mb-1.5 ${textMain}`}>
-                            PRIME ARCA SOUTH LOCATION:
-                          </div>
-                          <ul className={`space-y-1 ${textSub}`}>
-                            <li>• South Union Drive, Western Bicutan, Taguig City</li>
-                            <li>• Walking distance to Landers Superstore & Ayala Malls Arca South</li>
-                            <li>• Accessible to BGC, Makati, NAIA & major business districts</li>
-                          </ul>
-
-                          <div className={`font-display font-bold text-xs mt-3 mb-1 ${textMain}`}>
-                            BUILDING AMENITIES & PAYMENT:
-                          </div>
-                          <ul className={`space-y-1 ${textSub}`}>
-                            <li>• Swimming pool, indoor gym (subject to PMO guidelines), 24/7 Security</li>
-                            <li>• <strong>1 month advance + 2 months deposit</strong> (PDCs required)</li>
-                            <li>• No parking slot included • Utilities billed separately • Strictly NO PETS</li>
-                          </ul>
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className={`p-3.5 rounded-2xl border space-y-1.5 ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                        <div className={`font-display font-bold ${textMain}`}>UNIT INCLUSIONS (Fully Furnished):</div>
+                        <ul className={`space-y-1 ${textSub}`}>
+                          <li>• Smartly partitioned sleeping area with queen-sized bed & wardrobe</li>
+                          <li>• Cozy living space with loveseat & plush rug</li>
+                          <li>• Dedicated dining bar/workspace with aesthetic pendant lights</li>
+                          <li>• Equipped kitchen (Samsung fridge, microwave, induction cooker, kettle, rice cooker)</li>
+                          <li>• Private bathroom with shower</li>
+                        </ul>
                       </div>
 
-                      {/* Direct Fee-Saving Note */}
-                      <div className={`p-3 rounded-xl border text-[11px] ${sageBadge}`}>
-                        <strong>Note:</strong> To avoid Airbnb platform service fees for long-term stays, message us directly on our Facebook Page, Viber, or WhatsApp to process your 1-year lease and PDC payments!
+                      <div className={`p-3.5 rounded-2xl border space-y-1.5 ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                        <div className={`font-display font-bold ${textMain}`}>PRIME ARCA SOUTH LOCATION & AMENITIES:</div>
+                        <ul className={`space-y-1 ${textSub}`}>
+                          <li>• South Union Drive, Western Bicutan, Taguig City</li>
+                          <li>• Walking distance to Landers Superstore & Ayala Malls Arca South</li>
+                          <li>• Accessible to BGC, Makati, NAIA & major business districts</li>
+                          <li>• Swimming pool, indoor gym (subject to PMO guidelines) & 24/7 Security</li>
+                        </ul>
                       </div>
                     </div>
 
-                    {/* One-Click Copy Inquiry Numbers */}
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <div className={`p-3.5 rounded-2xl border text-xs space-y-1 ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                      <div className={`font-display font-bold ${textMain}`}>IMPORTANT NOTES & PAYMENT TERMS:</div>
+                      <p className={textSub}>
+                        • <strong>Payment Terms:</strong> 1 month advance + 2 months security deposit (Post-Dated Checks required for the 1-year term).
+                      </p>
+                      <p className={textSub}>
+                        • <strong>Exclusions:</strong> Parking slot is NOT included. Water & electricity billed separately by meter. Strictly NO PETS allowed.
+                      </p>
+                    </div>
+
+                    {/* One-Click Copy Contact Buttons */}
+                    <div className="flex flex-wrap gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => copyToClipboard('09206290342', 'Viber / WhatsApp (09206290342)')}
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${pillBg}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
                       >
                         📋 Copy Viber/WhatsApp: 09206290342
                       </button>
                       <button
                         type="button"
                         onClick={() => copyToClipboard('09282898594', 'Viber / Call (09282898594)')}
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${pillBg}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
                       >
-                        📋 Copy Secondary Viber: 09282898594
+                        📋 Copy Viber: 09282898594
                       </button>
                       <button
                         type="button"
                         onClick={() => copyToClipboard('09936460660', 'WhatsApp (09936460660)')}
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${pillBg}`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
                       >
                         📋 Copy WhatsApp: 09936460660
                       </button>
                     </div>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                {/* TAB 3: LIVE EMBEDDED IFRAME PREVIEW */}
-                {hostingTab === 'live-embed' && (
-                  <div className="p-4 sm:p-5 space-y-3 flex-1 flex flex-col justify-between">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setEmbedTarget('facebook')}
-                          className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
-                            embedTarget === 'facebook'
-                              ? 'bg-[#1877F2] text-white border-[#1877F2]'
-                              : pillBg
-                          }`}
-                        >
-                          Facebook Page Plugin
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEmbedTarget('airbnb')}
-                          className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
-                            embedTarget === 'airbnb'
-                              ? 'bg-[#FF385C] text-white border-[#FF385C]'
-                              : pillBg
-                          }`}
-                        >
-                          Airbnb Virtual Tour Frame
-                        </button>
-                      </div>
-                      <span className={`text-[11px] ${textSoft}`}>
-                        If blocked by browser privacy settings, use the direct launch buttons above
-                      </span>
-                    </div>
-
-                    <div className="w-full h-[440px] rounded-2xl overflow-hidden border border-stone-500/20 bg-white flex items-center justify-center relative">
-                      <iframe
-                        key={embedTarget}
-                        src={
-                          embedTarget === 'facebook'
-                            ? facebookPluginIframeSrc
-                            : airbnbPublicUrl
-                        }
-                        title="Live Condo Listing Preview"
-                        className="w-full h-full border-0"
-                        loading="lazy"
-                        allow="encrypted-media"
-                      />
-                    </div>
-                  </div>
-                )}
-              </AestheticCard>
-            </div>
-
-            {/* RIGHT COLUMN (5 COLS): PROPERTY MANAGEMENT & GUEST RELATIONS (MY ROLE) */}
-            <div className="lg:col-span-5 flex flex-col">
-              <AestheticCard isDark={isDark} className="p-6 sm:p-7 flex flex-col justify-between">
-                <div className="space-y-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${sageBadge}`}>
-                      Host & Property Manager
-                    </span>
-                    <span className={`font-serif-editorial italic text-2xl ${textSoft}`}>
-                      My Role
-                    </span>
+            {/* MODE 3: FULL LEASE SPECIFICATIONS & AMENITIES MATRIX */}
+            {arcaView === 'inclusions' && (
+              <div className={`p-6 sm:p-8 ${isDark ? 'bg-[#161513]' : 'bg-[#F6F4EF]'}`}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                    <div className={`font-serif-editorial italic text-2xl ${textMain}`}>01. Quick Lease Specs</div>
+                    <ul className={`space-y-2 text-xs sm:text-sm mt-3 ${textSub}`}>
+                      <li>• <strong>Rental Rate:</strong> ₱19,000 / month (Inclusive of Association Dues)</li>
+                      <li>• <strong>Lease Term:</strong> Minimum 1-year residential contract</li>
+                      <li>• <strong>Capacity:</strong> Maximum of 2 occupants</li>
+                      <li>• <strong>Payment Terms:</strong> 1 month advance + 2 months security deposit + PDCs</li>
+                    </ul>
                   </div>
 
-                  <div>
-                    <h3 className={`font-display text-xl sm:text-2xl font-bold tracking-tight ${textMain}`}>
-                      Property Management & Guest Relations
-                    </h3>
+                  <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                    <div className={`font-serif-editorial italic text-2xl ${textMain}`}>02. Appliance & Unit List</div>
+                    <ul className={`space-y-2 text-xs sm:text-sm mt-3 ${textSub}`}>
+                      <li>• Queen-sized bed, furnished wardrobe & slatted room divider</li>
+                      <li>• Loveseat, plush rug & dining bar/workspace with pendant lights</li>
+                      <li>• Samsung refrigerator, microwave, induction cooker, electric kettle & rice cooker</li>
+                      <li>• Private bathroom with shower</li>
+                    </ul>
+                  </div>
+
+                  <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                    <div className={`font-serif-editorial italic text-2xl ${textMain}`}>03. Building & Policies</div>
+                    <ul className={`space-y-2 text-xs sm:text-sm mt-3 ${textSub}`}>
+                      <li>• Swimming pool, indoor gym (subject to PMO registration) & landscaped open spaces</li>
+                      <li>• 24/7 Security and Concierge at Avida Towers Vireo</li>
+                      <li>• <strong>Exclusions:</strong> Parking slot not included; water, electricity & Wi-Fi billed separately; strictly NO PETS</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MODE 4: MY ROLE — PROPERTY MANAGEMENT & GUEST RELATIONS */}
+            {arcaView === 'role' && (
+              <div className={`p-6 sm:p-8 ${isDark ? 'bg-[#161513]' : 'bg-[#F6F4EF]'}`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                    <div className={`font-serif-editorial italic text-2xl ${textMain}`}>
+                      01. Client Engagement & Tenant Screening
+                    </div>
                     <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
-                      As the dedicated host and property manager for this unit at Avida Towers Vireo, I actively oversee the end-to-end guest and resident experience alongside platform operations.
+                      As the dedicated host and property manager for this unit, I serve as the primary point of contact for all guest and tenant inquiries across Airbnb, Facebook, Viber, and WhatsApp—screening prospective long-term residents, scheduling viewings, and ensuring clear, professional communication from initial inquiry through checkout.
                     </p>
                   </div>
 
-                  {/* Role Pillar Cards */}
-                  <div className="space-y-3">
-                    <div
-                      className={`p-4 rounded-2xl border ${
-                        isDark ? 'bg-[#141311] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
-                      }`}
-                    >
-                      <div className={`font-display font-bold text-sm ${textMain}`}>
-                        01. Client Engagement & Tenant Screening
-                      </div>
-                      <p className={`text-xs leading-relaxed mt-1.5 ${textSub}`}>
-                        Serve as the primary point of contact for all guest and tenant inquiries across Airbnb, Facebook, Viber, and WhatsApp—screening potential long-term residents, coordinating site viewings, and ensuring clear, professional communication from inquiry through checkout.
-                      </p>
+                  <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'}`}>
+                    <div className={`font-serif-editorial italic text-2xl ${textMain}`}>
+                      02. Issue Resolution & Platform Liaison
                     </div>
-
-                    <div
-                      className={`p-4 rounded-2xl border ${
-                        isDark ? 'bg-[#141311] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
-                      }`}
-                    >
-                      <div className={`font-display font-bold text-sm ${textMain}`}>
-                        02. Issue Resolution & Platform Liaison
-                      </div>
-                      <p className={`text-xs leading-relaxed mt-1.5 ${textSub}`}>
-                        Act as the direct liaison with Airbnb Support and building property management (PMO) to swiftly troubleshoot and resolve any platform, billing, contract, or policy issues—ensuring smooth operations where both the property and guests are protected.
-                      </p>
-                    </div>
+                    <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
+                      Act as the direct liaison with Airbnb Support and Avida Towers Vireo PMO administration to swiftly troubleshoot and resolve any platform, billing, contract, or policy issues—ensuring operations run smoothly and both the property and guests are protected.
+                    </p>
                   </div>
                 </div>
+              </div>
+            )}
 
-                {/* Bottom Direct Channels & Links */}
-                <div className={`mt-6 pt-4 border-t space-y-3.5 ${borderLine}`}>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      'Customer Service',
-                      'Conflict Resolution',
-                      'Airbnb Hosting',
-                      'Lease Administration',
-                      'Tenant Screening',
-                    ].map((skill) => (
-                      <span
-                        key={skill}
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] border ${pillBg}`}
-                      >
-                        {skill}
-                      </span>
-                    ))}
+            {/* 3. PERMANENT EXECUTIVE DETAILS FOOTER (Always Visible Below the Preview Stage) */}
+            <div className={`p-5 sm:p-7 border-t space-y-6 ${borderLine}`}>
+              {/* 3-Column Permanent Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="space-y-1.5">
+                  <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
+                    01 / Property Overview
                   </div>
+                  <h4 className={`font-display font-bold text-base ${textMain}`}>
+                    Cozy Studio in ARCA South (Avida Towers Vireo)
+                  </h4>
+                  <p className={`text-xs leading-relaxed ${textSub}`}>
+                    Modern 23 sqm fully furnished studio in Tower 1, ARCA South, Taguig. Walking distance to Landers Superstore & Ayala Malls Arca South, with fast access to BGC, Makati, and NAIA.
+                  </p>
+                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="space-y-1.5">
+                  <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
+                    02 / Property Management & Guest Relations (My Role)
+                  </div>
+                  <h4 className={`font-display font-bold text-base ${textMain}`}>
+                    End-to-End Host & Leasing Manager
+                  </h4>
+                  <p className={`text-xs leading-relaxed ${textSub}`}>
+                    Oversee <strong>Client Engagement</strong> (inquiry handling, tenant screening, viewing coordination) and <strong>Issue Resolution</strong> (direct liaison with Airbnb Support & building PMO for billing and policy compliance).
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
+                    03 / Direct Inquiries & Virtual Tour
+                  </div>
+                  <h4 className={`font-display font-bold text-base ${textMain}`}>
+                    ₱19,000 / mo (1-Year Residential Lease)
+                  </h4>
+                  <p className={`text-xs leading-relaxed ${textSub}`}>
+                    <strong>Viber / Call:</strong> 09206290342 / 09282898594<br />
+                    <strong>WhatsApp:</strong> 09206290342 / 09936460660<br />
+                    <strong>Virtual Tour:</strong>{' '}
                     <a
                       href={airbnbPublicUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className={`py-2.5 px-4 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-1.5 ${
-                        isDark
-                          ? 'bg-[#F5F3EF] text-[#121110] border-[#F5F3EF] hover:bg-white'
-                          : 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] hover:bg-[#35312E]'
-                      }`}
+                      className="underline font-semibold"
                     >
-                      <span>Virtual Tour (Airbnb)</span>
-                      <span>↗</span>
+                      airbnb.com/h/cozystudioarcasouth
                     </a>
-                    <a
-                      href={facebookPageUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`py-2.5 px-4 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-1.5 ${pillBg} hover:opacity-90`}
-                    >
-                      <span>Visit Facebook Page</span>
-                      <span>↗</span>
-                    </a>
-                  </div>
+                  </p>
                 </div>
-              </AestheticCard>
+              </div>
+
+              {/* Bottom Tag & Action Strip */}
+              <div className={`pt-4 border-t flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${borderLine}`}>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {[
+                    'Property Management',
+                    'Guest Relations',
+                    'Client Engagement',
+                    'Conflict & Issue Resolution',
+                    'Airbnb Hosting',
+                    'Lease Administration',
+                  ].map((tag) => (
+                    <span key={tag} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <a
+                    href={airbnbEditorUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#FF385C] text-white hover:opacity-95 transition-all"
+                  >
+                    Preview on Airbnb ↗
+                  </a>
+                  <a
+                    href={airbnbPublicUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${sageBadge}`}
+                  >
+                    airbnb.com/h/cozystudioarcasouth ↗
+                  </a>
+                  <a
+                    href={facebookPageUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#1877F2] text-white hover:opacity-95 transition-all"
+                  >
+                    Facebook Page ↗
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
+          </AestheticCard>
         </section>
 
         {/* SECTION 6: INTERACTIVE RESUME/CV WITH SMOOTH ACCORDIONS */}
@@ -2864,12 +2918,12 @@ export default function App() {
                     <div>
                       <div className="flex justify-between items-start gap-2">
                         <h4 className={`font-display font-bold text-sm ${textMain}`}>
-                          IT Practicum & On-the-Job Training (296 Hours)
+                          Finance & Accounting Intern (Practicum 1 • 296 Hours)
                         </h4>
                         <span className={`text-xs shrink-0 ${textSoft}`}>2026</span>
                       </div>
                       <p className={`text-xs mt-1 leading-relaxed ${textSub}`}>
-                        Applied hardware diagnostics, technical sales consultancy, and operational systems management.
+                        Completed 296 training hours at CoverDesk PH alongside enterprise retail hardware and technical operations.
                       </p>
                     </div>
                   </div>
@@ -3009,9 +3063,9 @@ export default function App() {
               07 / Capabilities
             </span>
             <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
-              Design & technical{' '}
+              Design, code &{' '}
               <span className="font-serif-editorial italic font-normal text-3xl sm:text-5xl">
-                toolkit
+                operations toolkit
               </span>
             </h2>
           </div>
@@ -3021,8 +3075,19 @@ export default function App() {
               <div className={`font-serif-editorial italic text-2xl mb-1 ${textMain}`}>01. UI/UX & Visuals</div>
               <p className={`text-xs mb-4 ${textSoft}`}>Human-centered design & branding</p>
               <div className="flex flex-wrap gap-1.5">
-                {['UI/UX Design', 'Figma Prototyping', 'Wireframing', 'Design Systems', 'Graphic Design', 'Adobe Photoshop', 'Canva', 'Visual Illustration'].map((skill) => (
-                  <span key={skill} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>{skill}</span>
+                {[
+                  'UI/UX Design',
+                  'Figma Prototyping',
+                  'Wireframing',
+                  'Design Systems',
+                  'Graphic Design',
+                  'Adobe Photoshop',
+                  'Canva',
+                  'Visual Illustration',
+                ].map((skill) => (
+                  <span key={skill} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>
+                    {skill}
+                  </span>
                 ))}
               </div>
             </AestheticCard>
@@ -3031,26 +3096,43 @@ export default function App() {
               <div className={`font-serif-editorial italic text-2xl mb-1 ${textMain}`}>02. Front-End & Code</div>
               <p className={`text-xs mb-4 ${textSoft}`}>Modern web & mobile engineering</p>
               <div className="flex flex-wrap gap-1.5">
-                {['React.js', 'React Native', 'MERN Stack', 'Tailwind CSS', 'JavaScript (ES6+)', 'Node.js & Express', 'MongoDB', 'Vite'].map((skill) => (
-                  <span key={skill} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>{skill}</span>
+                {[
+                  'React.js',
+                  'React Native',
+                  'MERN Stack',
+                  'Tailwind CSS',
+                  'JavaScript (ES6+)',
+                  'Node.js & Express',
+                  'MongoDB',
+                  'Vite',
+                ].map((skill) => (
+                  <span key={skill} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>
+                    {skill}
+                  </span>
                 ))}
               </div>
             </AestheticCard>
 
             <AestheticCard isDark={isDark} className="p-6">
-              <div className={`font-serif-editorial italic text-2xl mb-1 ${textMain}`}>03. Systems, Ops & Hosting</div>
-              <p className={`text-xs mb-4 ${textSoft}`}>Enterprise hardware, accounting & property mgmt</p>
+              <div className={`font-serif-editorial italic text-2xl mb-1 ${textMain}`}>
+                03. Tech Ops & Property Mgmt
+              </div>
+              <p className={`text-xs mb-4 ${textSoft}`}>
+                Enterprise systems, sales & residential hosting
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  'Technical Sales',
-                  'Computer Systems Servicing',
-                  'Active Directory (Win Server)',
-                  'Sales Accounting',
                   'Property & Lease Management',
-                  'Guest Relations',
-                  'Client Consultation',
+                  'Airbnb Hosting & Guest Relations',
+                  'Tenant Screening',
+                  'Conflict & Issue Resolution',
+                  'Technical Sales & Quotations',
+                  'Computer Systems Servicing NC II',
+                  'Sales Accounting',
                 ].map((skill) => (
-                  <span key={skill} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>{skill}</span>
+                  <span key={skill} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>
+                    {skill}
+                  </span>
                 ))}
               </div>
             </AestheticCard>
