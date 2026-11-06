@@ -18,6 +18,7 @@ function findBundledImage(keyword) {
   return null;
 }
 
+/* Prioritizes .png first (for AIRBNB.png, CAR.png, etc.) then .jpg/.jpeg */
 function buildImageCandidates(baseUrl, exactBaseName, searchKeyword) {
   const bundled = findBundledImage(searchKeyword || exactBaseName);
   const lower = exactBaseName.toLowerCase();
@@ -57,7 +58,7 @@ const NOSTALGIC_STARS = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  SOFT AESTHETIC SURFACE CARD (FULL-HEIGHT FLEX FOR BOTTOM BUTTON ALIGN)    */
+/*  SOFT AESTHETIC SURFACE CARD                                               */
 /* -------------------------------------------------------------------------- */
 function AestheticCard({ children, className = '', isDark = false }) {
   const cardRef = useRef(null);
@@ -97,96 +98,400 @@ function AestheticCard({ children, className = '', isDark = false }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  AIRBNB LIVE EMBED COMPONENT (OFFICIAL SDK + DIRECT IFRAME SUPPORT)        */
+/*  UNIVERSAL SMART IMAGE LOADER                                              */
 /* -------------------------------------------------------------------------- */
-function AirbnbLivePreview({ airbnbRoomUrl, airbnbShortUrl, isDark }) {
-  const [iframeMode, setIframeMode] = useState('embed'); // 'embed' | 'direct'
+function SmartImage({ candidates = [], alt, className = '', fallbackText }) {
+  const valid = candidates.filter(Boolean);
+  const [idx, setIdx] = useState(0);
+  const [failed, setFailed] = useState(valid.length === 0);
 
   useEffect(() => {
-    if (iframeMode !== 'embed') return;
-    const existingScript = document.getElementById('airbnb-Embed-Sdk');
-    if (existingScript) {
-      existingScript.remove();
-    }
-    const script = document.createElement('script');
-    script.id = 'airbnb-Embed-Sdk';
-    script.src = 'https://www.airbnb.com/embeddable/airbnb_jssdk';
-    script.async = true;
-    document.body.appendChild(script);
-  }, [iframeMode]);
+    setIdx(0);
+    setFailed(valid.length === 0);
+  }, [valid.length]);
+
+  if (failed || valid.length === 0) {
+    return (
+      <div className="w-full h-full min-h-[220px] p-6 flex flex-col items-center justify-center text-center border border-dashed border-stone-500/30 rounded-2xl">
+        <div className="font-display font-bold text-sm">{alt}</div>
+        {fallbackText && (
+          <div className="text-xs opacity-70 mt-1 max-w-xs">{fallbackText}</div>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-[420px] sm:h-[500px] lg:h-[540px] bg-transparent flex flex-col">
-      {/* Subtle Sub-Bar for Switching Embed Engine if Browser Blocks Iframes */}
+    <img
+      src={valid[idx]}
+      alt={alt}
+      loading="lazy"
+      onError={() => {
+        if (idx + 1 < valid.length) {
+          setIdx(idx + 1);
+        } else {
+          setFailed(true);
+        }
+      }}
+      className={className}
+    />
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  INTERACTIVE SCROLLABLE WEBSITE VIEWPORT FOR AIRBNB.PNG                    */
+/* -------------------------------------------------------------------------- */
+function AirbnbScrollableWebsitePreview({
+  airbnbRoomUrl,
+  airbnbShortUrl,
+  airbnbCandidates = [],
+  isDark,
+  borderLine,
+  pillBg,
+  onOpenZoomModal,
+}) {
+  const scrollRef = useRef(null);
+  const valid = airbnbCandidates.filter(Boolean);
+  const [idx, setIdx] = useState(0);
+  const [failed, setFailed] = useState(valid.length === 0);
+  const [scrollPct, setScrollPct] = useState(0);
+  const [magnifyOn, setMagnifyOn] = useState(false);
+  const [lens, setLens] = useState({ visible: false, x: 0, y: 0, bgX: 0, bgY: 0 });
+
+  useEffect(() => {
+    setIdx(0);
+    setFailed(valid.length === 0);
+  }, [valid.length]);
+
+  const activeImg = !failed ? valid[idx] : null;
+
+  const handleScroll = (e) => {
+    const el = e.currentTarget;
+    const max = el.scrollHeight - el.clientHeight;
+    setScrollPct(max > 0 ? Math.min(100, Math.round((el.scrollTop / max) * 100)) : 0);
+  };
+
+  const scrollStep = (dir) => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollBy({
+      top: dir === 'down' ? 380 : -380,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!magnifyOn || !activeImg) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setLens({
+      visible: true,
+      x,
+      y,
+      bgX: (x / rect.width) * 100,
+      bgY: (y / rect.height) * 100,
+    });
+  };
+
+  return (
+    <div className="flex flex-col w-full">
+      {/* Slim Interactive Website Toolbar */}
       <div
-        className={`px-4 py-2 border-b flex flex-wrap items-center justify-between gap-2 text-[11px] ${
-          isDark ? 'bg-[#141311] border-[#2E2C29] text-[#A8A29E]' : 'bg-[#F3F1EC] border-[#E5E2DC] text-[#57534E]'
+        className={`px-4 sm:px-6 py-2.5 border-b flex flex-wrap items-center justify-between gap-2 text-xs ${borderLine} ${
+          isDark ? 'bg-[#141311]' : 'bg-[#F5F3EE]'
         }`}
       >
-        <div className="flex items-center gap-2 truncate">
-          <span className="w-2 h-2 rounded-full bg-[#FF385C] animate-pulse shrink-0" />
-          <span className="truncate">{airbnbRoomUrl}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-400/85 shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85 shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/85 shrink-0" />
+          <a
+            href={airbnbRoomUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-1.5 text-[11px] font-medium truncate opacity-80 hover:opacity-100 hover:underline"
+          >
+            https://www.{airbnbShortUrl} — Scroll inside viewport to tour full listing
+          </a>
         </div>
+
+        {/* Viewport Controls: Magnifier Lens, Scroll Up/Down & Fullscreen Zoom */}
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
-            onClick={() => setIframeMode('embed')}
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
-              iframeMode === 'embed'
-                ? 'bg-[#FF385C] text-white border-[#FF385C]'
-                : 'border-stone-500/30 hover:opacity-100 opacity-75'
+            onClick={() => setMagnifyOn((prev) => !prev)}
+            className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-all flex items-center gap-1 ${
+              magnifyOn
+                ? 'bg-[#FF385C] text-white border-[#FF385C] shadow-sm'
+                : pillBg
             }`}
           >
-            Interactive Embed
+            <span>🔍</span>
+            <span>{magnifyOn ? 'Magnifier ON' : 'Magnify'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => scrollStep('up')}
+            className={`w-7 h-7 rounded-full border text-xs flex items-center justify-center transition-transform hover:scale-105 ${pillBg}`}
+            title="Scroll Up"
+          >
+            ↑
           </button>
           <button
             type="button"
-            onClick={() => setIframeMode('direct')}
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
-              iframeMode === 'direct'
-                ? 'bg-[#FF385C] text-white border-[#FF385C]'
-                : 'border-stone-500/30 hover:opacity-100 opacity-75'
-            }`}
+            onClick={() => scrollStep('down')}
+            className={`w-7 h-7 rounded-full border text-xs flex items-center justify-center transition-transform hover:scale-105 ${pillBg}`}
+            title="Scroll Down"
           >
-            Direct URL Frame
+            ↓
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenZoomModal}
+            className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition-all ${pillBg}`}
+          >
+            ⤢ Fullscreen Zoom
           </button>
         </div>
       </div>
 
-      {/* Main Live Preview Viewport */}
-      <div className="relative flex-1 w-full overflow-y-auto flex items-center justify-center bg-white dark:bg-[#121110]">
-        {iframeMode === 'embed' ? (
-          <div className="w-full h-full flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-            <div
-              className="airbnb-embed-frame w-full max-w-[820px] mx-auto"
-              data-id="1790979755480894562"
-              data-view="home"
-              data-hide-price="false"
-              style={{ width: '100%', height: '440px', margin: 'auto' }}
-            >
-              <a
-                href={airbnbRoomUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="underline font-semibold text-sm text-[#FF385C]"
-              >
-                View Cozy Studio in ARCA South on Airbnb ↗
-              </a>
-            </div>
+      {/* Live Scroll Progress Bar */}
+      <div className={`h-[3px] w-full ${isDark ? 'bg-[#242220]' : 'bg-[#E5E2DC]'}`}>
+        <div
+          className="h-full bg-[#FF385C] transition-all duration-150"
+          style={{ width: `${scrollPct}%` }}
+        />
+      </div>
+
+      {/* Main Scrollable Website Viewport (Renders AIRBNB.png at 100% Full Width) */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="relative w-full h-[460px] sm:h-[540px] lg:h-[600px] overflow-y-auto overflow-x-hidden bg-white scroll-smooth"
+      >
+        {activeImg ? (
+          <div
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setLens((prev) => ({ ...prev, visible: false }))}
+            onClick={() => {
+              if (!magnifyOn) window.open(airbnbRoomUrl, '_blank', 'noopener,noreferrer');
+            }}
+            className={`relative w-full ${
+              magnifyOn ? 'cursor-crosshair' : 'cursor-pointer'
+            }`}
+          >
+            <img
+              src={activeImg}
+              alt="Cozy Studio in ARCA South — Full Airbnb Listing Page"
+              onError={() => {
+                if (idx + 1 < valid.length) {
+                  setIdx(idx + 1);
+                } else {
+                  setFailed(true);
+                }
+              }}
+              className="w-full h-auto block select-none"
+            />
+
+            {/* 2.2x Hover Magnifying Lens */}
+            {magnifyOn && lens.visible && (
+              <div
+                className="pointer-events-none absolute w-48 h-48 rounded-full border-2 border-[#FF385C] shadow-[0_15px_40px_rgba(0,0,0,0.65)] z-30"
+                style={{
+                  left: `${lens.x - 96}px`,
+                  top: `${lens.y - 96}px`,
+                  backgroundImage: `url(${activeImg})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '235%',
+                  backgroundPosition: `${lens.bgX}% ${lens.bgY}%`,
+                }}
+              />
+            )}
           </div>
         ) : (
-          <iframe
-            src={airbnbRoomUrl}
-            title="Cozy Studio in ARCA South — Airbnb Live Preview"
-            className="w-full h-full border-0 block"
-            loading="lazy"
-          />
+          <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-zinc-700 space-y-2">
+            <div className="font-display font-bold text-base">
+              AIRBNB.png Preview Ready
+            </div>
+            <p className="text-xs max-w-md opacity-75">
+              Make sure <strong>AIRBNB.png</strong> is saved inside your <code>public/</code> folder so the full scrollable Airbnb listing renders here.
+            </p>
+          </div>
         )}
 
-        {/* Bottom-Right Floating Status Badge (Identical to PHASED) */}
-        <div className="pointer-events-none absolute bottom-3 right-3 px-3 py-1.5 rounded-full backdrop-blur-md bg-black/65 text-white text-[11px] flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Live Preview: {airbnbShortUrl}</span>
+        {/* Floating Bottom Bar: Scroll Indicator + Direct Airbnb Link */}
+        <div className="sticky bottom-3 left-0 right-0 px-4 flex items-center justify-between pointer-events-none z-20">
+          <span className="px-3.5 py-1.5 rounded-full backdrop-blur-md bg-black/70 text-white text-[11px] font-medium shadow-lg">
+            ↕ Scroll to explore full Airbnb page {scrollPct > 0 ? `(${scrollPct}%)` : ''}
+          </span>
+
+          <a
+            href={airbnbRoomUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="pointer-events-auto px-4 py-1.5 rounded-full bg-[#FF385C] hover:bg-[#E00B41] text-white text-[11px] font-display font-bold shadow-lg flex items-center gap-1.5 transition-all"
+          >
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+            <span>Open Live Listing on Airbnb ↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  2-COLUMN FACEBOOK SHOWCASE (AVIDA.JPG ON LEFT + DETAILS ON RIGHT)         */
+/* -------------------------------------------------------------------------- */
+function FacebookSplitShowcase({
+  facebookPageUrl,
+  airbnbRoomUrl,
+  avidaPosterCandidates = [],
+  isDark,
+  textMain,
+  textSub,
+  textSoft,
+  borderLine,
+  pillBg,
+  onCopyNumber,
+  onOpenPosterLightbox,
+}) {
+  const valid = avidaPosterCandidates.filter(Boolean);
+  const [idx, setIdx] = useState(0);
+  const [failed, setFailed] = useState(valid.length === 0);
+
+  return (
+    <div className={isDark ? 'bg-[#151412]' : 'bg-[#F7F5F0]'}>
+      <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+        {/* LEFT COLUMN (7 COLS): AVIDA.JPG POSTER IMAGE (CLICK TO MAGNIFY) */}
+        <div className="lg:col-span-7">
+          {!failed && valid.length > 0 ? (
+            <div
+              onClick={() => onOpenPosterLightbox(valid[idx])}
+              className="relative group cursor-zoom-in rounded-2xl overflow-hidden border border-stone-300/70 dark:border-stone-700/70 shadow-xl bg-black/5"
+            >
+              <img
+                src={valid[idx]}
+                alt="Avida Towers Vireo Tower 1 — For Lease ₱19,000/Month"
+                onError={() => {
+                  if (idx + 1 < valid.length) {
+                    setIdx(idx + 1);
+                  } else {
+                    setFailed(true);
+                  }
+                }}
+                className="w-full h-auto block transition-transform duration-500 ease-out group-hover:scale-[1.015]"
+              />
+              <div className="absolute bottom-3 right-3 px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                Click to Magnify Poster ⤢
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl overflow-hidden border border-stone-300 dark:border-stone-700 shadow-xl bg-gradient-to-br from-[#2B6CB0] via-[#4299E1] to-[#1A365D] p-6 text-white space-y-4">
+              <div className="font-display font-extrabold text-xl sm:text-2xl tracking-wide">
+                AVIDA TOWERS VIREO <span className="text-sm font-bold">TOWER 1</span>
+              </div>
+              <div className="bg-[#FAF8F5] text-zinc-900 rounded-2xl p-5 space-y-2 shadow-md">
+                <div className="font-display font-bold text-lg text-zinc-900">
+                  FOR LEASE: ₱19,000 / Month
+                </div>
+                <p className="text-xs text-zinc-700">
+                  Place <strong>AVIDA.jpg</strong> inside your <code>public/</code> folder to display the full poster image here.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN (5 COLS): FACEBOOK PAGE DETAILS, HIGHLIGHTS & INQUIRIES */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="space-y-1.5">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#1877F2]/15 text-[#1877F2] border border-[#1877F2]/30">
+              Official Facebook Leasing Page
+            </span>
+            <h3 className={`font-display text-xl sm:text-2xl font-bold tracking-tight pt-1 ${textMain}`}>
+              Cozy Studio at Avida Towers Vireo
+            </h3>
+            <p className={`text-xs ${textSoft}`}>
+              Avida Vireo Tower 1, South Union Drive, ARCA South, Taguig City
+            </p>
+          </div>
+
+          <p className={`text-xs sm:text-sm leading-relaxed ${textSub}`}>
+            Looking for a stylish and hassle-free home in Taguig? Our modern{' '}
+            <strong>23 sqm fully furnished studio in Tower 1</strong> is ready for long-term occupancy at{' '}
+            <strong>₱19,000 / month</strong> (inclusive of Association Dues), right next to Ayala Malls Arca South & Landers Superstore.
+          </p>
+
+          {/* Unit Highlights & Terms Box */}
+          <div
+            className={`p-4 rounded-2xl border space-y-2 text-xs ${
+              isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0] shadow-sm'
+            }`}
+          >
+            <div className={`font-display font-bold ${textMain}`}>
+              UNIT HIGHLIGHTS & TERMS:
+            </div>
+            <ul className={`space-y-1.5 ${textSub}`}>
+              <li>• Fully Furnished Studio with Smart & Cozy Partitioned Layout</li>
+              <li>• Queen bed, wardrobe, loveseat, dining/workspace bar & pendant lights</li>
+              <li>• Samsung fridge, microwave, induction cooker, kettle & rice cooker</li>
+              <li>• 24/7 Security, Swimming Pool & Indoor Gym (subject to PMO guidelines)</li>
+              <li>• Max 2 Occupants • 1 mo advance + 2 mos deposit (PDCs) • Strictly NO PETS</li>
+            </ul>
+          </div>
+
+          {/* One-Click Copy Inquiry Numbers */}
+          <div className="space-y-1.5">
+            <div className={`text-[10px] uppercase tracking-wider font-semibold ${textSoft}`}>
+              Direct Inquiries (Click to Copy Viber / WhatsApp):
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => onCopyNumber('09206290342', 'Viber / WhatsApp (09206290342)')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
+              >
+                📋 09206290342
+              </button>
+              <button
+                type="button"
+                onClick={() => onCopyNumber('09282898594', 'Viber / Call (09282898594)')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
+              >
+                📋 09282898594
+              </button>
+              <button
+                type="button"
+                onClick={() => onCopyNumber('09936460660', 'WhatsApp (09936460660)')}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
+              >
+                📋 09936460660
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <a
+              href={facebookPageUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex-1 py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166FE5] text-white font-display font-bold text-xs text-center shadow-md transition-colors"
+            >
+              Visit Facebook Page ↗
+            </a>
+            <a
+              href={airbnbRoomUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="py-2.5 px-4 rounded-xl bg-[#FF385C] hover:bg-[#E00B41] text-white font-display font-semibold text-xs text-center shadow-sm transition-colors"
+            >
+              Airbnb Link ↗
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -232,11 +537,9 @@ function ScrollableUiViewport({ project, isDark, onOpenInspector }) {
   const handleViewportScroll = (e) => {
     const el = e.currentTarget;
     const maxScroll = el.scrollHeight - el.clientHeight;
-    if (maxScroll > 0) {
-      setScrollPercent(Math.min(100, Math.round((el.scrollTop / maxScroll) * 100)));
-    } else {
-      setScrollPercent(0);
-    }
+    setScrollPercent(
+      maxScroll > 0 ? Math.min(100, Math.round((el.scrollTop / maxScroll) * 100)) : 0
+    );
   };
 
   const handleImageMouseMove = (e) => {
@@ -244,14 +547,12 @@ function ScrollableUiViewport({ project, isDark, onOpenInspector }) {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const bgX = (x / rect.width) * 100;
-    const bgY = (y / rect.height) * 100;
     setLensState({
       visible: true,
       x,
       y,
-      bgX,
-      bgY,
+      bgX: (x / rect.width) * 100,
+      bgY: (y / rect.height) * 100,
     });
   };
 
@@ -291,34 +592,26 @@ function ScrollableUiViewport({ project, isDark, onOpenInspector }) {
                   ? 'bg-[#242220] text-[#E7E5E0] border-[#35322F] hover:bg-[#2E2C29]'
                   : 'bg-white text-[#44403C] border-[#E5E2DC] hover:bg-stone-100'
               }`}
-              title="Toggle 2.2x Hover Magnifying Lens"
             >
               <span>🔍</span>
               <span>{magnifyEnabled ? 'Lens ON' : 'Magnify'}</span>
             </button>
           )}
-
           <button
             type="button"
             onClick={() => handleQuickScroll('up')}
-            className={`w-6 h-6 rounded-full border text-[10px] flex items-center justify-center transition-colors ${
-              isDark
-                ? 'bg-[#242220] border-[#35322F] hover:bg-[#2E2C29]'
-                : 'bg-white border-[#E5E2DC] hover:bg-stone-100'
+            className={`w-6 h-6 rounded-full border text-[10px] flex items-center justify-center ${
+              isDark ? 'bg-[#242220] border-[#35322F]' : 'bg-white border-[#E5E2DC]'
             }`}
-            title="Scroll Up Inside Frame"
           >
             ↑
           </button>
           <button
             type="button"
             onClick={() => handleQuickScroll('down')}
-            className={`w-6 h-6 rounded-full border text-[10px] flex items-center justify-center transition-colors ${
-              isDark
-                ? 'bg-[#242220] border-[#35322F] hover:bg-[#2E2C29]'
-                : 'bg-white border-[#E5E2DC] hover:bg-stone-100'
+            className={`w-6 h-6 rounded-full border text-[10px] flex items-center justify-center ${
+              isDark ? 'bg-[#242220] border-[#35322F]' : 'bg-white border-[#E5E2DC]'
             }`}
-            title="Scroll Down Inside Frame"
           >
             ↓
           </button>
@@ -386,69 +679,50 @@ function ScrollableUiViewport({ project, isDark, onOpenInspector }) {
             </div>
 
             <div className="grid grid-cols-3 gap-2.5">
-              <div
-                className={`p-3 rounded-xl border ${
-                  isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
-                }`}
-              >
-                <div className="text-[10px] opacity-60">Active SKUs</div>
-                <div className="font-display font-bold text-base mt-0.5">2,840</div>
-                <div className="text-[10px] text-emerald-500 mt-0.5">100% Indexed</div>
-              </div>
-              <div
-                className={`p-3 rounded-xl border ${
-                  isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
-                }`}
-              >
-                <div className="text-[10px] opacity-60">Checkout Speed</div>
-                <div className="font-display font-bold text-base mt-0.5">-35% Time</div>
-                <div className="text-[10px] text-emerald-500 mt-0.5">Low-Friction UI</div>
-              </div>
-              <div
-                className={`p-3 rounded-xl border ${
-                  isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
-                }`}
-              >
-                <div className="text-[10px] opacity-60">Stock Accuracy</div>
-                <div className="font-display font-bold text-base mt-0.5">99.4%</div>
-                <div className="text-[10px] text-emerald-500 mt-0.5">Auto-Audit</div>
-              </div>
+              {[
+                { k: 'Active SKUs', v: '2,840', s: '100% Indexed' },
+                { k: 'Checkout Speed', v: '-35% Time', s: 'Low-Friction UI' },
+                { k: 'Stock Accuracy', v: '99.4%', s: 'Auto-Audit' },
+              ].map((m) => (
+                <div
+                  key={m.k}
+                  className={`p-3 rounded-xl border ${
+                    isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
+                  }`}
+                >
+                  <div className="text-[10px] opacity-60">{m.k}</div>
+                  <div className="font-display font-bold text-base mt-0.5">{m.v}</div>
+                  <div className="text-[10px] text-emerald-500 mt-0.5">{m.s}</div>
+                </div>
+              ))}
             </div>
 
             <div
-              className={`p-3.5 rounded-xl border space-y-2.5 ${
+              className={`p-3.5 rounded-xl border space-y-2 ${
                 isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0]'
               }`}
             >
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span>Quick Barcode & Category Filter</span>
-                <span className="text-[10px] opacity-60">
-                  Produce • Pantry • Dairy • Beverages
-                </span>
-              </div>
-              <div className="space-y-1.5 text-[11px]">
-                {[
-                  { item: 'Fresh Farm Milk 1L', code: 'SKU-1042', stock: '48 in stock', price: '₱115.00' },
-                  { item: 'Whole Wheat Loaf', code: 'SKU-2089', stock: '22 in stock', price: '₱78.00' },
-                  { item: 'Organic Brown Rice 5kg', code: 'SKU-3190', stock: '16 in stock', price: '₱340.00' },
-                  { item: 'Arabica Ground Coffee', code: 'SKU-4011', stock: '31 in stock', price: '₱265.00' },
-                ].map((row) => (
-                  <div
-                    key={row.code}
-                    className={`flex items-center justify-between p-2 rounded-lg border ${
-                      isDark ? 'bg-[#121110] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
-                    }`}
-                  >
-                    <div>
-                      <div className="font-semibold">{row.item}</div>
-                      <div className="text-[10px] opacity-60">
-                        {row.code} • {row.stock}
-                      </div>
+              <div className="text-xs font-semibold">Quick Barcode & Category Filter</div>
+              {[
+                { item: 'Fresh Farm Milk 1L', code: 'SKU-1042', stock: '48 in stock', price: '₱115.00' },
+                { item: 'Whole Wheat Loaf', code: 'SKU-2089', stock: '22 in stock', price: '₱78.00' },
+                { item: 'Organic Brown Rice 5kg', code: 'SKU-3190', stock: '16 in stock', price: '₱340.00' },
+              ].map((row) => (
+                <div
+                  key={row.code}
+                  className={`flex items-center justify-between p-2 rounded-lg border text-[11px] ${
+                    isDark ? 'bg-[#121110] border-[#2E2C29]' : 'bg-[#FAF8F5] border-[#E7E5E0]'
+                  }`}
+                >
+                  <div>
+                    <div className="font-semibold">{row.item}</div>
+                    <div className="text-[10px] opacity-60">
+                      {row.code} • {row.stock}
                     </div>
-                    <span className="font-display font-bold">{row.price}</span>
                   </div>
-                ))}
-              </div>
+                  <span className="font-display font-bold">{row.price}</span>
+                </div>
+              ))}
             </div>
           </div>
         ) : activeImgUrl ? (
@@ -477,7 +751,7 @@ function ScrollableUiViewport({ project, isDark, onOpenInspector }) {
 
             {magnifyEnabled && lensState.visible && (
               <div
-                className="pointer-events-none absolute w-40 h-40 rounded-full border-2 border-white shadow-[0_10px_35px_rgba(0,0,0,0.65)] z-30"
+                className="pointer-events-none absolute w-40 h-40 rounded-full border-2 border-white shadow-2xl z-30"
                 style={{
                   left: `${lensState.x - 80}px`,
                   top: `${lensState.y - 80}px`,
@@ -490,196 +764,15 @@ function ScrollableUiViewport({ project, isDark, onOpenInspector }) {
             )}
           </div>
         ) : (
-          <div className="p-6 text-center h-full flex flex-col items-center justify-center space-y-3">
-            <div className="px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30">
-              {project.fileHint}
-            </div>
-            <div className="font-display font-bold text-base">{project.title}</div>
-            <p className="text-xs opacity-75 max-w-xs leading-relaxed">
-              Place <strong>{project.fileHint}</strong> inside your <code>public/</code> or{' '}
-              <code>src/assets/</code> folder to enable full vertical scrolling and magnification.
+          <div className="p-6 text-center h-full flex flex-col items-center justify-center space-y-2">
+            <div className="font-display font-bold text-sm">{project.title}</div>
+            <p className="text-xs opacity-75 max-w-xs">
+              Place <strong>{project.fileHint}</strong> inside <code>public/</code> to enable scrolling & magnification.
             </p>
           </div>
         )}
-
-        {project.isTallWeb && (
-          <div className="sticky bottom-2.5 left-0 right-0 flex justify-center pointer-events-none">
-            <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] font-medium shadow-md">
-              ↕ Scroll inside frame {scrollPercent > 0 ? `(${scrollPercent}%)` : ''} • Click to zoom
-            </span>
-          </div>
-        )}
       </div>
     </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  HIGH-RES BUILT-IN VISUAL CERTIFICATE REPLICA (IF CERT FILE IS MISSING)    */
-/* -------------------------------------------------------------------------- */
-function BuiltInCertificateDocument({ certId }) {
-  if (certId === 'tesda-ncii') {
-    return (
-      <div className="w-full h-full max-w-[380px] aspect-[1/1.35] bg-white text-zinc-900 rounded-lg p-4 border-2 border-indigo-900/30 shadow-md flex flex-col justify-between text-center select-none mx-auto overflow-hidden relative">
-        <div>
-          <div className="w-7 h-7 rounded-full bg-blue-900 text-white text-[8px] font-bold flex items-center justify-center mx-auto mb-1">
-            TESDA
-          </div>
-          <div className="text-[7px] uppercase tracking-wider text-zinc-600">
-            Republic of the Philippines
-          </div>
-          <div className="text-[8px] font-bold tracking-wide text-zinc-800">
-            TECHNICAL EDUCATION AND SKILLS DEVELOPMENT AUTHORITY
-          </div>
-          <div className="my-1.5 py-1 bg-yellow-200/80 text-blue-950 font-extrabold text-[11px] tracking-wider">
-            NATIONAL CERTIFICATE II
-          </div>
-          <div className="text-[8px] italic text-zinc-500">in</div>
-          <div className="text-[10px] font-extrabold text-zinc-900 tracking-wide">
-            COMPUTER SYSTEMS SERVICING
-          </div>
-          <div className="text-[7px] italic text-zinc-500 mt-1">is hereby awarded to</div>
-          <div className="text-[11px] font-extrabold text-zinc-900 mt-0.5">
-            GIRBAUD SKY E. VILLAREAL
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-left text-[6px] text-zinc-700 border-t border-b border-zinc-200 py-1.5 my-1">
-          <div>
-            <div className="font-bold text-zinc-900">BASIC & COMMON</div>
-            <div>• Workplace communication</div>
-            <div>• Apply quality standards</div>
-            <div>• Perform computer operations</div>
-          </div>
-          <div>
-            <div className="font-bold text-zinc-900">CORE COMPETENCIES</div>
-            <div>• Install & configure systems</div>
-            <div>• Set-up Computer Networks</div>
-            <div>• Set-up Computer Servers</div>
-          </div>
-        </div>
-        <div className="flex items-end justify-between text-[6.5px] text-zinc-700 pt-1">
-          <div className="text-left">
-            <div className="font-bold text-blue-900">TESDA</div>
-            <div>Cert No: 26131402035012</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-zinc-900">JOSE FRANCISCO &quot;KIKO&quot; B. BENITEZ</div>
-            <div className="text-[6px]">DIRECTOR GENERAL</div>
-          </div>
-          <div className="text-right">
-            <div>Issued: Oct 22, 2026</div>
-            <div>Valid: Oct 21, 2031</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (certId === 'cisco-data-science') {
-    return (
-      <div className="w-full h-full max-w-[440px] aspect-[1.42/1] bg-white text-zinc-900 rounded-lg p-4 border border-zinc-300 shadow-md flex flex-col justify-between text-center select-none mx-auto">
-        <div className="flex items-center justify-start gap-1.5 text-left">
-          <span className="font-extrabold text-[10px] tracking-tighter text-zinc-900">CISCO</span>
-          <span className="text-[9px] text-sky-600 font-medium">Networking Academy</span>
-        </div>
-        <div className="space-y-1 my-auto py-2">
-          <div className="text-[8px] text-zinc-500">This certificate is awarded to</div>
-          <div className="text-sm sm:text-base font-extrabold text-sky-700">
-            Girbaud Sky Villareal
-          </div>
-          <div className="text-[8px] text-zinc-600">for successfully completing</div>
-          <div className="text-xs font-extrabold text-sky-800">
-            Introduction to Data Science
-          </div>
-          <div className="text-[7.5px] text-zinc-500">
-            offered by DICT-ITU DTC Initiative through the Cisco Networking Academy program.
-          </div>
-        </div>
-        <div className="flex items-end justify-between text-[7.5px] text-zinc-600 border-t border-zinc-200 pt-2">
-          <div className="text-left">
-            <div className="font-semibold text-zinc-800">John Philip Tan</div>
-            <div>Instructor • DICT-ITU DTC Initiative</div>
-          </div>
-          <div className="text-right">
-            <div className="font-bold text-zinc-900">31 Jan 2026</div>
-            <div>Completion Date</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full h-full max-w-[440px] aspect-[1.42/1] bg-[#FCFBF7] text-zinc-900 rounded-lg p-4 border-2 border-amber-600/50 shadow-md flex flex-col justify-between text-center select-none mx-auto">
-      <div>
-        <div className="text-[7px] font-bold uppercase tracking-wider text-emerald-950">
-          NATIONAL COLLEGE OF BUSINESS AND ARTS – FAIRVIEW CAMPUS
-        </div>
-        <div className="text-[6.5px] text-zinc-600">
-          INFORMATION SYSTEM STUDENT ORGANIZATION COUNCIL
-        </div>
-        <div className="text-sm font-extrabold tracking-widest text-emerald-900 mt-1 border-b border-emerald-800/30 pb-0.5 inline-block px-4">
-          CERTIFICATE OF PARTICIPATION
-        </div>
-      </div>
-      <div className="my-auto py-1">
-        <div className="text-[7.5px] text-zinc-600">This Certificate is Proudly Presented to</div>
-        <div className="font-serif-editorial italic text-lg sm:text-xl text-emerald-800 leading-tight my-0.5">
-          Girbaud Sky E. Villareal
-        </div>
-        <div className="text-[7.5px] font-bold text-zinc-800">
-          “Artificial Intelligence in Education: How Student Can Use AI Responsibly”
-        </div>
-        <div className="text-[6.5px] text-zinc-600 mt-0.5">
-          Given this 5th Day of February 2026 • Essential skills in AI literacy & digital innovation
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-1 text-[6px] text-zinc-700 border-t border-amber-500/30 pt-1.5">
-        <div>
-          <div className="font-bold text-emerald-950">Mr. Ryan Lyster Pascua</div>
-          <div>ISSOC President</div>
-        </div>
-        <div>
-          <div className="font-bold text-emerald-950">Ms. Cyrille Anne Nery, MSIT</div>
-          <div>ISSOC Advisor</div>
-        </div>
-        <div>
-          <div className="font-bold text-emerald-950">Mr. Julius Salonga, MSCS</div>
-          <div>IS Department Head</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SmartCertImage({ candidates = [], certId, alt, className = '' }) {
-  const validCandidates = candidates.filter(Boolean);
-  const [idx, setIdx] = useState(0);
-  const [allFailed, setAllFailed] = useState(validCandidates.length === 0);
-
-  useEffect(() => {
-    setIdx(0);
-    setAllFailed(validCandidates.length === 0);
-  }, [certId, validCandidates.length]);
-
-  if (allFailed) {
-    return <BuiltInCertificateDocument certId={certId} />;
-  }
-
-  return (
-    <img
-      src={validCandidates[idx]}
-      alt={alt}
-      loading="lazy"
-      onError={() => {
-        if (idx + 1 < validCandidates.length) {
-          setIdx(idx + 1);
-        } else {
-          setAllFailed(true);
-        }
-      }}
-      className={className}
-    />
   );
 }
 
@@ -700,7 +793,6 @@ export default function App() {
   const portraitCandidates = buildImageCandidates(baseUrl, 'profile', 'profile');
   const [portraitIdx, setPortraitIdx] = useState(0);
   const [photoError, setPhotoError] = useState(false);
-
   const resumePdfUrl = `${baseUrl}resume.pdf`;
 
   const rotatingTitles = [
@@ -720,41 +812,28 @@ export default function App() {
   const [openProcessIdx, setOpenProcessIdx] = useState(0);
   const [openExpIds, setOpenExpIds] = useState(['villman', 'arca-host', 'undecide']);
   const [phasedView, setPhasedView] = useState('live');
-
-  /* PHASED-Style Switchable State for Airbnb & Facebook Live Previews */
   const [arcaView, setArcaView] = useState('airbnb'); // 'airbnb' | 'facebook' | 'details'
-  const [fbFrameMode, setFbFrameMode] = useState('plugin'); // 'plugin' | 'direct'
 
-  /* Horizontal UI Carousel State & Ref */
   const [uiCategoryFilter, setUiCategoryFilter] = useState('all');
   const [activeUiSlide, setActiveUiSlide] = useState(0);
   const uiCarouselRef = useRef(null);
 
-  /* Fullscreen Scroll & Zoom Inspector Modal State */
   const [inspectorModal, setInspectorModal] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
-
-  /* Universal Lightbox State for Certificates */
   const [lightboxData, setLightboxData] = useState(null);
 
   const [cvFilter, setCvFilter] = useState('all');
   const [selectedSkill, setSelectedSkill] = useState(null);
 
-  /* ------------------------------------------------------------------------ */
-  /*  EXACT AIRBNB & FACEBOOK LINKS PROVIDED BY USER                          */
-  /* ------------------------------------------------------------------------ */
+  /* Exact Airbnb & Facebook Links + Image Candidates */
   const airbnbRoomUrl =
-    'https://www.airbnb.com/rooms/1790979755480894562?source_impression_id=p3_1793893036_P3r9zw9unl_aJy4g';
+    'https://www.airbnb.com/rooms/1790979755480894562?guests=1&adults=1&s=67&unique_share_id=12659c23-ca20-49e5-8666-7e455be2320d&source_impression_id=p3_1793973358_P3XeULVGRC-tQlS8';
   const airbnbShortUrl = 'airbnb.com/h/cozystudioarcasouth';
   const facebookPageUrl =
     'https://www.facebook.com/people/Cozy-Studio-at-Avida-Towers-Vireo/61594962617625/';
-  const facebookPluginEmbedUrl = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
-    facebookPageUrl
-  )}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`;
+  const airbnbScreenshotCandidates = buildImageCandidates(baseUrl, 'AIRBNB', 'airbnb');
+  const avidaPosterCandidates = buildImageCandidates(baseUrl, 'AVIDA', 'avida');
 
-  /* ------------------------------------------------------------------------ */
-  /*  UI DESIGN WORKS DATA (HORIZONTAL CAROUSEL SHOWCASE)                     */
-  /* ------------------------------------------------------------------------ */
   const uiDesignWorks = [
     {
       id: 'casa-amelinda',
@@ -769,10 +848,10 @@ export default function App() {
       isMobile: false,
       candidates: buildImageCandidates(baseUrl, 'CAR', 'car'),
       description:
-        'Designed a vibrant, welcoming full-page resort interface ("Be Our Guest, Feel Your Best") for Casa Amelinda Resort in Brgy. Butas Na Bato, Dingalan, Aurora. Features a clear hero booking callout, categorized event packages, a 6-card Popular Rooms gallery, and a verified guest review spotlight.',
+        'Designed a vibrant, welcoming full-page resort interface ("Be Our Guest, Feel Your Best") for Casa Amelinda Resort in Dingalan, Aurora. Features categorized event packages, a 6-card Popular Rooms gallery, and guest reviews.',
       highlights: [
-        'Structured vertical visual hierarchy guiding guests from hero discovery to room selection and instant booking.',
-        'High-contrast gold action buttons paired with coastal azure surfaces for effortless readability.',
+        'Structured vertical hierarchy guiding guests from hero discovery to instant room booking.',
+        'High-contrast gold action buttons paired with coastal azure surfaces.',
       ],
       tags: ['Figma Web UI', 'Hospitality UX', 'Booking Flow', 'Responsive Layout'],
     },
@@ -789,10 +868,10 @@ export default function App() {
       isMobile: false,
       candidates: buildImageCandidates(baseUrl, 'ORPHANAGE', 'orphanage'),
       description:
-        'Crafted an empathetic, story-driven web platform ("Where Every Child Belongs, and Every Heart is Home — Fostering Hope, Creating Homes") for Heartful Haven Orphanage. Designed to build donor trust and inspire community volunteering through warm earthy tones and structured storytelling.',
+        'Crafted an empathetic, story-driven web platform ("Where Every Child Belongs, and Every Heart is Home") for Heartful Haven Orphanage to inspire community volunteering and donor trust.',
       highlights: [
-        'Dedicated split-grid sections for "Our Mission" and "Our Vision" paired with authentic photography.',
-        'Interactive "Meet the Santos family!" testimony carousel and video-backed volunteer onboarding cards.',
+        'Dedicated split-grid sections for Mission & Vision paired with authentic photography.',
+        'Interactive family testimony carousel and video-backed volunteer onboarding cards.',
       ],
       tags: ['Non-Profit Web UI', 'Visual Storytelling', 'Volunteer UX', 'Figma Prototype'],
     },
@@ -809,10 +888,10 @@ export default function App() {
       isMobile: false,
       candidates: buildImageCandidates(baseUrl, 'webuibrown', 'webuibrown'),
       description:
-        'Designed an earth-toned, editorial resort landing page ("Sunsets: nature’s daily masterpiece.") for Golden Sunset Beach Resorts in Cabangan, Zambales. Balances warm olive-gold tones with clean white space to highlight coastal experiences and event packages.',
+        'Designed an earth-toned resort landing page ("Sunsets: nature’s daily masterpiece.") for Golden Sunset Beach Resorts in Cabangan, Zambales.',
       highlights: [
-        'Icon-driven Events bar (Wedding, Birthday, Reunion, Team Building, Seminar) for rapid user navigation.',
-        'Curated "Popular Scenery" rating cards leading into the "Unleash Wanderlust With Sunset" booking section.',
+        'Icon-driven Events bar (Wedding, Birthday, Reunion, Team Building, Seminar).',
+        'Curated "Popular Scenery" rating cards leading into the booking callout.',
       ],
       tags: ['Landing Page UI', 'Editorial Layout', 'Color Architecture', 'Travel & Resort'],
     },
@@ -828,27 +907,15 @@ export default function App() {
       isTallWeb: false,
       isMobile: true,
       screens: [
-        {
-          label: '01 / Login UI',
-          caption: 'Glassmorphic Authentication & Onboarding (ZENARA1)',
-          candidates: buildImageCandidates(baseUrl, 'ZENARA1', 'zenara1'),
-        },
-        {
-          label: '02 / Social Feed',
-          caption: 'Stories Tray & Creator Photo Feed (ZENARA2)',
-          candidates: buildImageCandidates(baseUrl, 'ZENARA2', 'zenara2'),
-        },
-        {
-          label: '03 / Messages & QuizQuest',
-          caption: 'Direct Messaging & Gamified QuizQuest Widget (ZENARA3)',
-          candidates: buildImageCandidates(baseUrl, 'ZENARA3', 'zenara3'),
-        },
+        { label: '01 / Login UI', candidates: buildImageCandidates(baseUrl, 'ZENARA1', 'zenara1') },
+        { label: '02 / Social Feed', candidates: buildImageCandidates(baseUrl, 'ZENARA2', 'zenara2') },
+        { label: '03 / Messages & QuizQuest', candidates: buildImageCandidates(baseUrl, 'ZENARA3', 'zenara3') },
       ],
       description:
-        'Designed a cohesive 3-screen mobile social networking and messaging application ("Connect with your happiness.") featuring a lotus brand identity, soft glassmorphic login cards, an interactive stories and creator feed, and a gamified direct messaging inbox.',
+        'Designed a 3-screen mobile social networking and messaging application featuring a lotus brand identity, glassmorphic login cards, creator stories, and a gamified inbox.',
       highlights: [
-        'Screen 1 (ZENARA1): Frosted-glass login interface over fluid magenta-violet ambient shapes.',
-        'Screen 2 & 3 (ZENARA2 & ZENARA3): Creator stories tray, photo feed, active thought bubbles, and an integrated "Play QuizQuest" social gaming bar (Lvl. 128 • Exp. 2456/3000).',
+        'Screen 1: Frosted-glass login interface over fluid magenta-violet shapes.',
+        'Screen 2 & 3: Creator feed, active status bubbles, and an integrated QuizQuest gaming bar (Lvl. 128).',
       ],
       tags: ['Mobile App UI', 'Glassmorphism', 'Social & Messaging UX', 'Gamification'],
     },
@@ -865,10 +932,10 @@ export default function App() {
       isMobile: false,
       candidates: [],
       description:
-        'Redesigned the operational user interface for a retail grocery management system to streamline daily cashier checkout workflows, reduce item lookup friction, and improve real-time SKU inventory tracking.',
+        'Redesigned the operational user interface for a retail grocery management system to streamline daily cashier checkout workflows and real-time SKU inventory tracking.',
       highlights: [
-        'High-contrast dashboard metrics for active SKUs, stock sync accuracy, and rapid category filtering.',
-        'Structured for fast keyboard and touch interaction during peak store hours.',
+        'High-contrast dashboard metrics for active SKUs and rapid category filtering.',
+        'Structured for fast keyboard and touch interaction during peak hours.',
       ],
       tags: ['System UI', 'Operations UX', 'POS Interface', 'Inventory Dashboard'],
     },
@@ -881,15 +948,11 @@ export default function App() {
 
   const scrollToUiSlide = (index) => {
     if (!uiCarouselRef.current || filteredUiWorks.length === 0) return;
-    const boundedIdx = Math.max(0, Math.min(index, filteredUiWorks.length - 1));
+    const bounded = Math.max(0, Math.min(index, filteredUiWorks.length - 1));
     const cards = uiCarouselRef.current.querySelectorAll('[data-ui-card]');
-    if (cards[boundedIdx]) {
-      cards[boundedIdx].scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'start',
-      });
-      setActiveUiSlide(boundedIdx);
+    if (cards[bounded]) {
+      cards[bounded].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      setActiveUiSlide(bounded);
     }
   };
 
@@ -897,12 +960,9 @@ export default function App() {
     if (!uiCarouselRef.current) return;
     const container = uiCarouselRef.current;
     const cards = container.querySelectorAll('[data-ui-card]');
-    if (!cards.length) return;
-
     let closestIdx = 0;
     let minDistance = Infinity;
     const containerLeft = container.getBoundingClientRect().left;
-
     cards.forEach((card, idx) => {
       const dist = Math.abs(card.getBoundingClientRect().left - containerLeft);
       if (dist < minDistance) {
@@ -920,7 +980,6 @@ export default function App() {
     }
   }, [uiCategoryFilter]);
 
-  /* Official Certifications Data */
   const certifications = [
     {
       id: 'tesda-ncii',
@@ -931,7 +990,7 @@ export default function App() {
       badge: 'National Certificate II',
       candidates: buildImageCandidates(baseUrl, 'TESDANCII', 'tesda'),
       description:
-        'Certified in installing and configuring computer systems, setting up computer networks and servers, and maintaining and repairing enterprise computer systems and networks.',
+        'Certified in installing and configuring computer systems, setting up computer networks and servers, and maintaining enterprise computer systems and networks.',
       tags: ['Computer Systems', 'Computer Networks', 'Server Setup', 'System Maintenance'],
     },
     {
@@ -949,7 +1008,7 @@ export default function App() {
     {
       id: 'ncba-ai-education',
       title: 'Artificial Intelligence in Education: How Student Can Use AI Responsibly',
-      issuer: 'NCBA Fairview Campus • Information System Student Organization Council',
+      issuer: 'NCBA Fairview Campus • ISSOC',
       date: 'Given Feb 5, 2026',
       credentialId: 'ISSOC Webinar Series',
       badge: 'AI Literacy',
@@ -1017,7 +1076,7 @@ export default function App() {
     try {
       localStorage.setItem('gsv-aesthetic-theme', isDark ? 'dark' : 'light');
     } catch {
-      // ignore storage errors
+      // ignore
     }
     document.documentElement.style.backgroundColor = isDark ? '#121110' : '#FAF8F5';
   }, [isDark]);
@@ -1035,13 +1094,14 @@ export default function App() {
 
   useEffect(() => {
     const updateClock = () => {
-      const formatted = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Manila',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      }).format(new Date());
-      setTimeString(formatted);
+      setTimeString(
+        new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Manila',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        }).format(new Date())
+      );
     };
     updateClock();
     const timer = setInterval(updateClock, 15000);
@@ -1126,10 +1186,7 @@ export default function App() {
 
   const handleOpenUiInspector = (project, initialScreenIdx = 0) => {
     setZoomLevel(1);
-    setInspectorModal({
-      project,
-      screenIdx: initialScreenIdx,
-    });
+    setInspectorModal({ project, screenIdx: initialScreenIdx });
   };
 
   const handleAddSuggestedPhrase = (phrase) => {
@@ -1156,7 +1213,7 @@ export default function App() {
     try {
       localStorage.setItem('gsv-performance-reviews-v3', JSON.stringify(updated));
     } catch {
-      // ignore storage errors
+      // ignore
     }
     setReviewerName('');
     setReviewerRole('');
@@ -1284,7 +1341,7 @@ export default function App() {
 
   const textMain = isDark ? 'text-[#F5F3EF]' : 'text-[#1C1917]';
   const textSub = isDark ? 'text-[#A8A29E]' : 'text-[#57534E]';
-  const textSoft = isDark ? 'text-[#78716C]' : 'text-[#78716C]';
+  const textSoft = 'text-[#78716C]';
   const borderLine = isDark ? 'border-[#2E2C29]' : 'border-[#E7E5E0]';
   const pillBg = isDark
     ? 'bg-[#242220] text-[#E7E5E0] border-[#35322F]'
@@ -1351,7 +1408,6 @@ export default function App() {
           </div>
         ))}
 
-        {/* Plain Circle Planet 1 (Upper-Left) */}
         <div
           className="absolute top-[14%] left-[4%] sm:left-[8%] w-64 h-64 sm:w-96 sm:h-96 flex items-center justify-center animate-calm-orbit-1"
           style={{ perspective: '900px' }}
@@ -1362,7 +1418,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Plain Circle Planet 2 (Lower-Right) */}
         <div
           className="absolute bottom-[10%] right-[2%] sm:right-[7%] w-72 h-72 sm:w-[430px] sm:h-[430px] flex items-center justify-center animate-calm-orbit-2"
           style={{ perspective: '900px' }}
@@ -1506,7 +1561,7 @@ export default function App() {
                 { id: 'process', label: 'Design Process' },
                 { id: 'work', label: 'Featured System (PHASED)' },
                 { id: 'ui-works', label: 'UI Design Works Carousel (5)' },
-                { id: 'hosting', label: 'Airbnb & Facebook Live Preview' },
+                { id: 'hosting', label: 'Airbnb & Facebook Preview' },
                 { id: 'experience', label: 'Experience & Resume/CV' },
                 { id: 'certifications', label: 'Verified Certifications (3)' },
                 { id: 'capabilities', label: 'Capabilities & Skills' },
@@ -1963,33 +2018,22 @@ export default function App() {
               </div>
             )}
 
-            <div className={`p-5 sm:p-7 border-t flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${borderLine}`}>
+            <div className={`p-5 sm:p-7 border-t flex flex-col md:flex-row md:items-center justify-between gap-4 ${borderLine}`}>
               <div className="space-y-1.5 max-w-2xl">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className={`font-display text-xl sm:text-2xl font-bold tracking-tight ${textMain}`}>PHASED</h3>
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full border ${pillBg}`}>
-                    PHishing And Social Engineering Detection
-                  </span>
-                </div>
+                <h3 className={`font-display text-xl sm:text-2xl font-bold tracking-tight ${textMain}`}>
+                  PHASED — AI Cybersecurity Platform
+                </h3>
                 <p className={`text-xs sm:text-sm leading-relaxed ${textSub}`}>
-                  An AI-powered cybersecurity platform engineered with the MERN stack and React Native to detect phishing links and social engineering threats across web and mobile.
+                  Engineered with the MERN stack and React Native to detect phishing links and social engineering threats across web and mobile.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                 {['UI/UX Design', 'MERN Stack', 'React Native', 'AI Security'].map((tag) => (
                   <span key={tag} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>
                     {tag}
                   </span>
                 ))}
-                <a
-                  href="https://phased.undecide.dev/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${sageBadge}`}
-                >
-                  phased.undecide.dev ↗
-                </a>
               </div>
             </div>
           </AestheticCard>
@@ -1999,123 +2043,79 @@ export default function App() {
         {/*  SECTION 4: HORIZONTAL STUDIO CAROUSEL — UI/UX DESIGN WORKS          */}
         {/* ==================================================================== */}
         <section id="ui-works" className="reveal space-y-6 scroll-mt-24">
-          <div className={`flex flex-col gap-5 border-b pb-5 ${borderLine}`}>
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-              <div>
-                <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-                  03 / Interactive Interface Gallery
+          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b pb-5 ${borderLine}`}>
+            <div>
+              <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
+                03 / Interactive Interface Gallery
+              </span>
+              <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
+                UI/UX design{' '}
+                <span className="font-serif-editorial italic font-normal text-3xl sm:text-5xl">
+                  works & prototypes
                 </span>
-                <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
-                  UI/UX design{' '}
-                  <span className="font-serif-editorial italic font-normal text-3xl sm:text-5xl">
-                    works & prototypes
-                  </span>
-                </h2>
-                <p className={`text-xs sm:text-sm mt-1.5 max-w-xl ${textSub}`}>
-                  Glide horizontally through the studio showcase, scroll vertically inside any web frame, or toggle the <strong>🔍 Magnify</strong> lens to inspect details.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap sm:flex-nowrap items-center justify-between lg:justify-end gap-3">
-                <div
-                  className={`inline-flex items-center flex-nowrap gap-1 p-1.5 rounded-full border overflow-x-auto max-w-full no-scrollbar ${pillBg}`}
-                >
-                  {[
-                    { id: 'all', label: 'All UI Works (5)' },
-                    { id: 'web', label: 'Web Pages (3)' },
-                    { id: 'mobile', label: 'Mobile UI (1)' },
-                    { id: 'system', label: 'System / POS (1)' },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setUiCategoryFilter(tab.id)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap shrink-0 ${
-                        uiCategoryFilter === tab.id
-                          ? isDark
-                            ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
-                            : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
-                          : `${textSub} hover:${textMain}`
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => scrollToUiSlide(activeUiSlide - 1)}
-                    disabled={activeUiSlide <= 0}
-                    className={`w-9 h-9 rounded-full border flex items-center justify-center text-xs transition-all ${pillBg} ${
-                      activeUiSlide <= 0 ? 'opacity-35 cursor-not-allowed' : 'hover:scale-105'
-                    }`}
-                    aria-label="Previous UI project"
-                  >
-                    ←
-                  </button>
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-display font-bold border ${pillBg}`}>
-                    {String(activeUiSlide + 1).padStart(2, '0')} /{' '}
-                    {String(filteredUiWorks.length).padStart(2, '0')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => scrollToUiSlide(activeUiSlide + 1)}
-                    disabled={activeUiSlide >= filteredUiWorks.length - 1}
-                    className={`w-9 h-9 rounded-full border flex items-center justify-center text-xs transition-all ${pillBg} ${
-                      activeUiSlide >= filteredUiWorks.length - 1
-                        ? 'opacity-35 cursor-not-allowed'
-                        : 'hover:scale-105'
-                    }`}
-                    aria-label="Next UI project"
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
+              </h2>
+              <p className={`text-xs sm:text-sm mt-1.5 max-w-xl ${textSub}`}>
+                Glide horizontally through the studio showcase, scroll vertically inside any web frame, or toggle the <strong>🔍 Magnify</strong> lens to inspect details.
+              </p>
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
-              {filteredUiWorks.map((proj, idx) => {
-                const isCurrent = activeUiSlide === idx;
-                return (
+            <div className="flex flex-wrap sm:flex-nowrap items-center justify-between lg:justify-end gap-3">
+              <div
+                className={`inline-flex items-center flex-nowrap gap-1 p-1.5 rounded-full border overflow-x-auto max-w-full no-scrollbar ${pillBg}`}
+              >
+                {[
+                  { id: 'all', label: 'All UI Works (5)' },
+                  { id: 'web', label: 'Web Pages (3)' },
+                  { id: 'mobile', label: 'Mobile UI (1)' },
+                  { id: 'system', label: 'System / POS (1)' },
+                ].map((tab) => (
                   <button
-                    key={proj.id}
+                    key={tab.id}
                     type="button"
-                    onClick={() => scrollToUiSlide(idx)}
-                    className={`group flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border text-left transition-all duration-300 shrink-0 ${
-                      isCurrent
+                    onClick={() => setUiCategoryFilter(tab.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap shrink-0 ${
+                      uiCategoryFilter === tab.id
                         ? isDark
-                          ? 'bg-[#242220] border-[#44403C] shadow-md'
-                          : 'bg-white border-[#1C1917]/30 shadow-sm'
-                        : isDark
-                        ? 'bg-[#161513]/70 border-[#2E2C29] opacity-65 hover:opacity-100'
-                        : 'bg-[#F3F1EC]/60 border-[#E7E5E0] opacity-70 hover:opacity-100'
+                          ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
+                          : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
+                        : `${textSub} hover:${textMain}`
                     }`}
                   >
-                    <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center font-serif-editorial italic text-sm transition-colors ${
-                        isCurrent
-                          ? isDark
-                            ? 'bg-[#F5F3EF] text-[#121110]'
-                            : 'bg-[#1C1917] text-[#FAF8F5]'
-                          : pillBg
-                      }`}
-                    >
-                      {proj.number}
-                    </span>
-                    <div className="pr-1">
-                      <div className={`text-xs font-display font-bold whitespace-nowrap ${textMain}`}>
-                        {proj.title}
-                      </div>
-                      <div className={`text-[10px] whitespace-nowrap ${textSoft}`}>
-                        {proj.badge}
-                      </div>
-                    </div>
+                    {tab.label}
                   </button>
-                );
-              })}
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => scrollToUiSlide(activeUiSlide - 1)}
+                  disabled={activeUiSlide <= 0}
+                  className={`w-9 h-9 rounded-full border flex items-center justify-center text-xs transition-all ${pillBg} ${
+                    activeUiSlide <= 0 ? 'opacity-35 cursor-not-allowed' : 'hover:scale-105'
+                  }`}
+                  aria-label="Previous UI project"
+                >
+                  ←
+                </button>
+                <span className={`px-3 py-1.5 rounded-full text-xs font-display font-bold border ${pillBg}`}>
+                  {String(activeUiSlide + 1).padStart(2, '0')} /{' '}
+                  {String(filteredUiWorks.length).padStart(2, '0')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => scrollToUiSlide(activeUiSlide + 1)}
+                  disabled={activeUiSlide >= filteredUiWorks.length - 1}
+                  className={`w-9 h-9 rounded-full border flex items-center justify-center text-xs transition-all ${pillBg} ${
+                    activeUiSlide >= filteredUiWorks.length - 1
+                      ? 'opacity-35 cursor-not-allowed'
+                      : 'hover:scale-105'
+                  }`}
+                  aria-label="Next UI project"
+                >
+                  →
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2124,7 +2124,7 @@ export default function App() {
             onScroll={handleUiCarouselScroll}
             className="flex items-stretch gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 pt-1 no-scrollbar"
           >
-            {filteredUiWorks.map((project, idx) => (
+            {filteredUiWorks.map((project) => (
               <div
                 key={project.id}
                 data-ui-card
@@ -2195,31 +2195,19 @@ export default function App() {
                           ))}
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          {project.id !== 'caiantrix-ui' && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenUiInspector(project, 0)}
-                              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-2 ${
-                                isDark
-                                  ? 'bg-[#F5F3EF] text-[#121110] border-[#F5F3EF] hover:bg-white'
-                                  : 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] hover:bg-[#35312E]'
-                              }`}
-                            >
-                              <span>⤢ Fullscreen Scroll & Magnifier</span>
-                            </button>
-                          )}
-
-                          {idx < filteredUiWorks.length - 1 && (
-                            <button
-                              type="button"
-                              onClick={() => scrollToUiSlide(idx + 1)}
-                              className={`py-2.5 px-3.5 rounded-xl text-xs font-display font-semibold border transition-all shrink-0 ${pillBg} hover:opacity-90`}
-                            >
-                              Next →
-                            </button>
-                          )}
-                        </div>
+                        {project.id !== 'caiantrix-ui' && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenUiInspector(project, 0)}
+                            className={`w-full py-2.5 px-4 rounded-xl text-xs font-display font-semibold border transition-all flex items-center justify-center gap-2 ${
+                              isDark
+                                ? 'bg-[#F5F3EF] text-[#121110] border-[#F5F3EF] hover:bg-white'
+                                : 'bg-[#1C1917] text-[#FAF8F5] border-[#1C1917] hover:bg-[#35312E]'
+                            }`}
+                          >
+                            <span>⤢ Fullscreen Scroll & Magnifier</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2250,7 +2238,7 @@ export default function App() {
         </section>
 
         {/* ==================================================================== */}
-        {/*  SECTION 5: AIRBNB & FACEBOOK LIVE WEBSITE PREVIEW (LIKE PHASED)     */}
+        {/*  SECTION 5: AIRBNB (SCROLLABLE AIRBNB.PNG) & FACEBOOK SPLIT STUDIO   */}
         {/* ==================================================================== */}
         <section id="hosting" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b pb-4 ${borderLine}`}>
@@ -2266,36 +2254,34 @@ export default function App() {
               </h2>
             </div>
             <span className={`text-xs ${textSoft}`}>
-              Switch between the live Airbnb listing, Facebook Page preview, and role details
+              Avida Towers Vireo, Taguig City • ₱19,000 / month
             </span>
           </div>
 
-          {/* EXACT PHASED-STYLE CARD FOR AIRBNB & FACEBOOK */}
           <AestheticCard isDark={isDark} className="overflow-hidden">
-            {/* Top Header Bar (Identical Structure to PHASED) */}
+            {/* 1. TOP STUDIO HEADER BAR: Switcher + Airbnb Red & Facebook Blue Buttons */}
             <div className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-3 ${borderLine}`}>
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border ${sageBadge}`}>
                   ARCA SOUTH CONDO
                 </span>
                 <span className={`text-xs font-medium ${textSub}`}>
-                  <strong>Avida Towers Vireo</strong> • Entire Condo · 2 Guests · 1 Bedroom · 1 Bed · 1 Bath
+                  Entire Condo · 2 Guests · 1 Bedroom · 1 Bed · 1 Bath (23 sqm Tower 1)
                 </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {/* Mode Switcher: Airbnb Live Preview | Facebook Live Preview | Role & Lease Details */}
-                <div className={`inline-flex items-center flex-nowrap p-1 rounded-full border overflow-x-auto max-w-full no-scrollbar ${pillBg}`}>
+                <div className={`inline-flex items-center p-1 rounded-full border ${pillBg}`}>
                   {[
-                    { id: 'airbnb', label: 'Airbnb Live Preview' },
-                    { id: 'facebook', label: 'Facebook Live Preview' },
+                    { id: 'airbnb', label: 'Airbnb Preview' },
+                    { id: 'facebook', label: 'Facebook Preview' },
                     { id: 'details', label: 'Role & Lease Details' },
                   ].map((tab) => (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => setArcaView(tab.id)}
-                      className={`px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+                      className={`px-3.5 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap ${
                         arcaView === tab.id
                           ? isDark
                             ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
@@ -2308,25 +2294,20 @@ export default function App() {
                   ))}
                 </div>
 
-                {/* Direct External Launch Buttons */}
                 <a
                   href={airbnbRoomUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-display font-semibold transition-all shadow-sm whitespace-nowrap ${
-                    isDark
-                      ? 'bg-[#F5F3EF] text-[#121110] hover:bg-white'
-                      : 'bg-[#1C1917] text-[#FAF8F5] hover:bg-[#35312E]'
-                  }`}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-display font-semibold bg-[#FF385C] hover:bg-[#E00B41] text-white transition-all shadow-sm whitespace-nowrap"
                 >
-                  <span>Visit Airbnb</span>
+                  <span>View Airbnb</span>
                   <span>↗</span>
                 </a>
                 <a
                   href={facebookPageUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-display font-semibold border transition-all whitespace-nowrap ${pillBg}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-display font-semibold bg-[#1877F2] hover:bg-[#166FE5] text-white transition-all shadow-sm whitespace-nowrap"
                 >
                   <span>Facebook Page</span>
                   <span>↗</span>
@@ -2334,73 +2315,56 @@ export default function App() {
               </div>
             </div>
 
-            {/* BORDERLESS SHOWCASE AREA 1: AIRBNB LIVE PREVIEW */}
+            {/* 2A. AIRBNB TAB: FULL-WIDTH SCROLLABLE WEBSITE PREVIEW OF AIRBNB.PNG */}
             {arcaView === 'airbnb' && (
-              <AirbnbLivePreview
+              <AirbnbScrollableWebsitePreview
                 airbnbRoomUrl={airbnbRoomUrl}
                 airbnbShortUrl={airbnbShortUrl}
+                airbnbCandidates={airbnbScreenshotCandidates}
                 isDark={isDark}
+                borderLine={borderLine}
+                pillBg={pillBg}
+                onOpenZoomModal={() => {
+                  setZoomLevel(1);
+                  setInspectorModal({
+                    project: {
+                      id: 'airbnb-full-page',
+                      title: 'Cozy Studio in ARCA South — Full Airbnb Listing Page',
+                      subtitle: 'Avida Towers Vireo, Taguig City • Scroll vertically & use zoom controls',
+                      isMobile: false,
+                      candidates: airbnbScreenshotCandidates,
+                    },
+                    screenIdx: 0,
+                  });
+                }}
               />
             )}
 
-            {/* BORDERLESS SHOWCASE AREA 2: FACEBOOK LIVE WEBSITE PREVIEW */}
+            {/* 2B. FACEBOOK TAB: 2-COLUMN LAYOUT (AVIDA.JPG ON LEFT + DETAILS ON RIGHT) */}
             {arcaView === 'facebook' && (
-              <div className="relative w-full h-[420px] sm:h-[500px] lg:h-[540px] bg-transparent flex flex-col">
-                <div
-                  className={`px-4 py-2 border-b flex flex-wrap items-center justify-between gap-2 text-[11px] ${
-                    isDark ? 'bg-[#141311] border-[#2E2C29] text-[#A8A29E]' : 'bg-[#F3F1EC] border-[#E5E2DC] text-[#57534E]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="w-2 h-2 rounded-full bg-[#1877F2] animate-pulse shrink-0" />
-                    <span className="truncate">{facebookPageUrl}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setFbFrameMode('plugin')}
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
-                        fbFrameMode === 'plugin'
-                          ? 'bg-[#1877F2] text-white border-[#1877F2]'
-                          : 'border-stone-500/30 opacity-75 hover:opacity-100'
-                      }`}
-                    >
-                      Live Page Plugin
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFbFrameMode('direct')}
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all ${
-                        fbFrameMode === 'direct'
-                          ? 'bg-[#1877F2] text-white border-[#1877F2]'
-                          : 'border-stone-500/30 opacity-75 hover:opacity-100'
-                      }`}
-                    >
-                      Direct URL Frame
-                    </button>
-                  </div>
-                </div>
-
-                <div className="relative flex-1 w-full bg-white dark:bg-[#121110] flex items-center justify-center overflow-hidden">
-                  <iframe
-                    key={fbFrameMode}
-                    src={fbFrameMode === 'plugin' ? facebookPluginEmbedUrl : facebookPageUrl}
-                    title="Cozy Studio at Avida Towers Vireo — Facebook Live Preview"
-                    className={`h-full border-0 block ${
-                      fbFrameMode === 'plugin' ? 'w-full max-w-[520px] mx-auto' : 'w-full'
-                    }`}
-                    loading="lazy"
-                    allow="encrypted-media"
-                  />
-                  <div className="pointer-events-none absolute bottom-3 right-3 px-3 py-1.5 rounded-full backdrop-blur-md bg-black/65 text-white text-[11px] flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Live Preview: Cozy Studio at Avida Towers Vireo</span>
-                  </div>
-                </div>
-              </div>
+              <FacebookSplitShowcase
+                facebookPageUrl={facebookPageUrl}
+                airbnbRoomUrl={airbnbRoomUrl}
+                avidaPosterCandidates={avidaPosterCandidates}
+                isDark={isDark}
+                textMain={textMain}
+                textSub={textSub}
+                textSoft={textSoft}
+                borderLine={borderLine}
+                pillBg={pillBg}
+                onCopyNumber={copyToClipboard}
+                onOpenPosterLightbox={(srcUrl) =>
+                  setLightboxData({
+                    certId: 'avida-poster',
+                    title: 'Avida Towers Vireo Tower 1 — ARCA South, Taguig City',
+                    subtitle: 'For Lease: ₱19,000 / Month • Official Facebook Leasing Poster',
+                    candidates: [srcUrl, ...avidaPosterCandidates],
+                  })
+                }
+              />
             )}
 
-            {/* BORDERLESS SHOWCASE AREA 3: ROLE & LEASE DETAILS (Matches PHASED's 3-Column UX Tab) */}
+            {/* 2C. ROLE & LEASE DETAILS TAB */}
             {arcaView === 'details' && (
               <div className={`p-6 sm:p-10 space-y-6 ${isDark ? 'bg-[#161513]' : 'bg-[#F6F4EF]'}`}>
                 <div className="grid sm:grid-cols-3 gap-5">
@@ -2409,8 +2373,8 @@ export default function App() {
                       Property Management (My Role)
                     </div>
                     <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
-                      <strong>Client Engagement:</strong> Primary point of contact for guest inquiries, long-term tenant screening, and end-to-end communication.<br /><br />
-                      <strong>Issue Resolution:</strong> Direct liaison with Airbnb Support & building PMO to resolve platform, billing, or policy matters swiftly.
+                      <strong>Client Engagement:</strong> Serve as primary point of contact for guest inquiries, screening long-term tenants, and ensuring clear communication from booking through checkout.<br /><br />
+                      <strong>Issue Resolution:</strong> Direct liaison with Airbnb Support & building PMO to swiftly resolve platform, billing, or policy matters.
                     </p>
                   </div>
 
@@ -2419,7 +2383,7 @@ export default function App() {
                       Space & Inclusions (23 sqm)
                     </div>
                     <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
-                      Fully furnished Tower 1 studio with a slatted room divider, queen-sized bed, wardrobe, loveseat, dining/workspace bar with pendant lights, and equipped kitchen (Samsung fridge, microwave, induction cooker, kettle, rice cooker).
+                      Fully furnished Tower 1 studio with a slatted room divider, queen-sized bed, furnished wardrobe, loveseat, dining/workspace bar with pendant lights, and equipped kitchen (Samsung refrigerator, microwave, induction cooker, kettle, and rice cooker).
                     </p>
                   </div>
 
@@ -2428,7 +2392,7 @@ export default function App() {
                       Leasing Terms & Contacts
                     </div>
                     <p className={`text-xs sm:text-sm leading-relaxed mt-2 ${textSub}`}>
-                      <strong>₱19,000 / month</strong> (Inclusive of Association Dues) • Min. 1-year contract • Max 2 occupants • 1 mo advance + 2 mos deposit (PDCs).<br /><br />
+                      <strong>₱19,000 / month</strong> (Inclusive of Association Dues) • 1-year contract (PDCs) • Max 2 occupants • 1 mo advance + 2 mos deposit. Utilities billed separately by meter.<br /><br />
                       <strong>Viber:</strong> 09206290342 / 09282898594<br />
                       <strong>WhatsApp:</strong> 09206290342 / 09936460660
                     </p>
@@ -2437,36 +2401,53 @@ export default function App() {
               </div>
             )}
 
-            {/* Case Study Details Footer (Identical Structure to PHASED Footer) */}
-            <div className={`p-5 sm:p-7 border-t flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${borderLine}`}>
-              <div className="space-y-1.5 max-w-2xl">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className={`font-display text-xl sm:text-2xl font-bold tracking-tight ${textMain}`}>
-                    Cozy Studio in ARCA South
-                  </h3>
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full border ${pillBg}`}>
-                    Avida Towers Vireo • ₱19,000/mo
-                  </span>
+            {/* 3. CLEAN, ALIGNED 3-COLUMN EXECUTIVE FOOTER */}
+            <div className={`p-5 sm:p-7 border-t ${borderLine}`}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-1.5">
+                  <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
+                    01 / Space & Location
+                  </div>
+                  <h4 className={`font-display font-bold text-sm sm:text-base ${textMain}`}>
+                    Avida Towers Vireo (Tower 1 • 23 sqm)
+                  </h4>
+                  <p className={`text-xs leading-relaxed ${textSub}`}>
+                    Fully furnished studio with a slatted room divider, queen bed, loveseat, dining/workspace bar, and equipped kitchen. Walking distance to Landers & Ayala Malls Arca South.
+                  </p>
                 </div>
-                <p className={`text-xs sm:text-sm leading-relaxed ${textSub}`}>
-                  As the dedicated Host and Property Manager for this modern 23 sqm studio in ARCA South, Taguig, I oversee end-to-end guest engagement, long-term tenant screening, lease administration, and direct platform & PMO issue resolution.
-                </p>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                {['Property Management', 'Guest Relations', 'Client Engagement', 'Issue Resolution'].map((tag) => (
-                  <span key={tag} className={`px-3 py-1 rounded-full text-xs border ${pillBg}`}>
-                    {tag}
-                  </span>
-                ))}
-                <a
-                  href={airbnbRoomUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${sageBadge}`}
-                >
-                  {airbnbShortUrl} ↗
-                </a>
+                <div className="space-y-1.5">
+                  <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
+                    02 / Property Management (My Role)
+                  </div>
+                  <h4 className={`font-display font-bold text-sm sm:text-base ${textMain}`}>
+                    Client Engagement & Issue Resolution
+                  </h4>
+                  <p className={`text-xs leading-relaxed ${textSub}`}>
+                    Serve as primary contact for guest inquiries and long-term tenant screening, while acting as direct liaison with Airbnb Support and building PMO to resolve billing or policy matters.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className={`text-[11px] uppercase tracking-wider font-semibold ${textSoft}`}>
+                    03 / Leasing Terms & Inquiries
+                  </div>
+                  <h4 className={`font-display font-bold text-sm sm:text-base ${textMain}`}>
+                    ₱19,000 / month (Inc. Assoc. Dues)
+                  </h4>
+                  <p className={`text-xs leading-relaxed ${textSub}`}>
+                    Tailored for 1-year residential leases (1 mo advance + 2 mos deposit, PDCs).{' '}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard('09206290342', 'Viber / WhatsApp (09206290342)')
+                      }
+                      className={`underline font-semibold mt-0.5 inline-block ${textMain}`}
+                    >
+                      Viber / WhatsApp: 0920 629 0342 (Copy)
+                    </button>
+                  </p>
+                </div>
               </div>
             </div>
           </AestheticCard>
@@ -2740,9 +2721,8 @@ export default function App() {
                         : 'bg-[#F5F2EC] border-[#E5E0D8] group-hover:border-[#D6D3CD]'
                     }`}
                   >
-                    <SmartCertImage
+                    <SmartImage
                       candidates={cert.candidates}
-                      certId={cert.id}
                       alt={cert.title}
                       className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                     />
@@ -3060,9 +3040,7 @@ export default function App() {
         </footer>
       </main>
 
-      {/* ---------------------------------------------------------------------- */}
-      {/*  FULLSCREEN SCROLLABLE & MAGNIFIABLE UI DESIGN INSPECTOR MODAL         */}
-      {/* ---------------------------------------------------------------------- */}
+      {/* FULLSCREEN SCROLLABLE & MAGNIFIABLE UI DESIGN / AIRBNB INSPECTOR MODAL */}
       {inspectorModal && (
         <div
           onClick={() => setInspectorModal(null)}
@@ -3152,9 +3130,8 @@ export default function App() {
                     minWidth: proj.isMobile ? '280px' : undefined,
                   }}
                 >
-                  <SmartCertImage
+                  <SmartImage
                     candidates={cands}
-                    certId={proj.id}
                     alt={proj.title}
                     className="w-full h-auto block rounded-xl shadow-2xl mx-auto"
                   />
@@ -3165,7 +3142,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Universal Fullscreen Lightbox for Certificates & PHASED UI Artwork */}
+      {/* UNIVERSAL FULLSCREEN LIGHTBOX FOR CERTIFICATES, PHASED & AVIDA POSTER */}
       {lightboxData && (
         <div
           onClick={() => setLightboxData(null)}
@@ -3193,9 +3170,8 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
             className="max-w-5xl w-full max-h-[84vh] overflow-y-auto rounded-2xl bg-black/40 p-4 flex items-center justify-center"
           >
-            <SmartCertImage
+            <SmartImage
               candidates={lightboxData.candidates}
-              certId={lightboxData.certId}
               alt={lightboxData.title}
               className="max-w-full max-h-[78vh] w-auto h-auto object-contain rounded-xl shadow-2xl mx-auto"
             />
