@@ -3,7 +3,7 @@ import phasedImage from './assets/phased.png';
 
 /* Automatically discover any images placed inside src/ or src/assets/ */
 const BUNDLED_ASSETS = import.meta.glob(
-  './**/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}',
+  './**/*.{png,jpg,jpeg,jfif,webp,PNG,JPG,JPEG,JFIF,WEBP}',
   { eager: true, import: 'default' }
 );
 
@@ -27,22 +27,27 @@ function buildImageCandidates(baseUrl, exactBaseName, searchKeyword, preferJpg =
     bundled,
     `${baseUrl}${exactBaseName}.png`,
     `${baseUrl}${exactBaseName}.jpg`,
+    `${baseUrl}${exactBaseName}.jfif`,
     `${baseUrl}${exactBaseName}.jpeg`,
     `${baseUrl}${lower}.png`,
     `${baseUrl}${lower}.jpg`,
+    `${baseUrl}${lower}.jfif`,
     `${baseUrl}${upper}.PNG`,
     `${baseUrl}${upper}.JPG`,
     `${baseUrl}assets/${exactBaseName}.png`,
     `${baseUrl}assets/${exactBaseName}.jpg`,
+    `${baseUrl}assets/${exactBaseName}.jfif`,
   ];
 
   const jpgFirst = [
     bundled,
     `${baseUrl}${exactBaseName}.jpg`,
     `${baseUrl}${exactBaseName}.png`,
+    `${baseUrl}${exactBaseName}.jfif`,
     `${baseUrl}${exactBaseName}.jpeg`,
     `${baseUrl}${lower}.jpg`,
     `${baseUrl}${lower}.png`,
+    `${baseUrl}${lower}.jfif`,
     `${baseUrl}${upper}.JPG`,
     `${baseUrl}${upper}.PNG`,
     `${baseUrl}assets/${exactBaseName}.jpg`,
@@ -70,12 +75,30 @@ const NOSTALGIC_STARS = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  INTERLOCKED ALL-CAPS "GSV" VECTOR MONOGRAM & EDITORIAL WORDMARK LOGO      */
+/*  ANIMATED DUAL-THEME IMAGE LOGO (logo_dark.png & logo_light.png)           */
 /* -------------------------------------------------------------------------- */
-function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
-  const emblemBg = isDark ? '#161513' : '#1C1917';
-  const emblemInk = isDark ? '#F5F3EF' : '#FAF8F5';
-  const accentGold = isDark ? '#D6CFC2' : '#E7E0D3';
+function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft, baseUrl }) {
+  const darkCandidates = buildImageCandidates(baseUrl, 'logo_dark', 'logo_dark');
+  const lightCandidates = buildImageCandidates(baseUrl, 'logo_light', 'logo_light');
+
+  const [darkIdx, setDarkIdx] = useState(0);
+  const [lightIdx, setLightIdx] = useState(0);
+  const [darkFailed, setDarkFailed] = useState(darkCandidates.length === 0);
+  const [lightFailed, setLightFailed] = useState(lightCandidates.length === 0);
+
+  const activeCandidates = isDark ? darkCandidates : lightCandidates;
+  const activeIdx = isDark ? darkIdx : lightIdx;
+  const isFailed = isDark ? darkFailed : lightFailed;
+
+  const handleImgError = () => {
+    if (isDark) {
+      if (darkIdx + 1 < darkCandidates.length) setDarkIdx(darkIdx + 1);
+      else setDarkFailed(true);
+    } else {
+      if (lightIdx + 1 < lightCandidates.length) setLightIdx(lightIdx + 1);
+      else setLightFailed(true);
+    }
+  };
 
   return (
     <a
@@ -83,118 +106,45 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
       className="flex items-center gap-2.5 sm:gap-3 group shrink-0 focus:outline-none"
       aria-label="Girbaud Sky Villareal — Back to top"
     >
-      {/* Bespoke Interlocked All-Caps GSV Monogram Crest */}
+      {/* Animated Logo Container: Gentle Float + Hover Tilt/Scale + Sheen */}
       <div
-        className={`relative flex items-center justify-center rounded-2xl border transition-all duration-500 ease-out group-hover:scale-105 ${
+        className={`relative flex items-center justify-center rounded-full overflow-hidden border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6 ${
           isScrolled ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10 sm:w-11 sm:h-11'
         } ${
           isDark
-            ? 'bg-gradient-to-br from-[#23211E] via-[#161513] to-[#0E0D0C] border-[#3F3B36] shadow-lg shadow-black/50'
-            : 'bg-gradient-to-br from-[#262320] via-[#1C1917] to-[#110F0E] border-[#1C1917] shadow-md'
+            ? 'bg-[#141413] border-[#35322F] shadow-[0_0_20px_rgba(245,243,239,0.08)] group-hover:border-[#57534E]'
+            : 'bg-[#F4F1EA] border-[#D6D3CD] shadow-[0_4px_14px_rgba(28,25,23,0.08)] group-hover:border-[#A8A29E]'
         }`}
       >
-        <svg
-          viewBox="0 0 100 100"
-          className="w-full h-full p-1 select-none"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {/* Outer Architectural Octagon / Crest Bezel */}
-          <polygon
-            points="30,7 70,7 93,30 93,70 70,93 30,93 7,70 7,30"
-            stroke={accentGold}
-            strokeWidth="2.2"
-            strokeOpacity="0.32"
-          />
-          <circle
-            cx="50"
-            cy="50"
-            r="41"
-            stroke={emblemInk}
-            strokeWidth="1.2"
-            strokeOpacity="0.16"
-            strokeDasharray="4 3"
-          />
-
-          {/* LAYER 1: CAPITAL "G" (Left-Center Interlocked Anchor) */}
-          <text
-            x="33"
-            y="67"
-            textAnchor="middle"
-            fill={emblemInk}
-            stroke={emblemBg}
-            strokeWidth="5"
-            style={{
-              paintOrder: 'stroke fill',
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontWeight: 800,
-              fontSize: '48px',
-              letterSpacing: '-0.05em',
-            }}
-          >
-            G
-          </text>
-
-          {/* LAYER 2: CAPITAL "V" (Right-Center Interlocked Wing) */}
-          <text
-            x="67"
-            y="67"
-            textAnchor="middle"
-            fill={accentGold}
-            stroke={emblemBg}
-            strokeWidth="5"
-            style={{
-              paintOrder: 'stroke fill',
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontWeight: 800,
-              fontSize: '48px',
-              letterSpacing: '-0.05em',
-            }}
-          >
-            V
-          </text>
-
-          {/* SHARED LIGATURE BAR (Physically welds G, S, and V together) */}
-          <rect
-            x="28"
-            y="48.5"
-            width="44"
-            height="4.2"
-            rx="2.1"
-            fill={emblemInk}
-            stroke={emblemBg}
-            strokeWidth="2.2"
-          />
-
-          {/* LAYER 3: CAPITAL "S" (Elevated Center Spine Weaving Over G & V) */}
-          <text
-            x="50"
-            y="71"
-            textAnchor="middle"
-            fill={emblemInk}
-            stroke={emblemBg}
-            strokeWidth="5.5"
-            style={{
-              paintOrder: 'stroke fill',
-              fontFamily: "'Instrument Serif', Georgia, serif",
-              fontWeight: 700,
-              fontSize: '62px',
-            }}
-          >
-            S
-          </text>
-
-          {/* Top & Bottom Monogram Crown Diamond Accents */}
-          <polygon points="50,10 53,14 50,18 47,14" fill="#10B981" />
-          <polygon points="50,82 52.5,85.5 50,89 47.5,85.5" fill={accentGold} fillOpacity="0.6" />
-        </svg>
-
-        {/* Live Emerald Availability Dot */}
+        {/* Subtle Animated Spinning Halo Ring on Hover */}
         <span
-          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 ${
-            isDark ? 'border-[#1A1917]' : 'border-white'
+          className={`pointer-events-none absolute inset-0 rounded-full border border-dashed opacity-0 group-hover:opacity-40 transition-opacity duration-500 animate-spin ${
+            isDark ? 'border-[#F5F3EF]' : 'border-[#1C1917]'
           }`}
+          style={{ animationDuration: '10s' }}
         />
+
+        {/* Diagonal Shimmer Sweep on Hover */}
+        <span className="pointer-events-none absolute -inset-full bg-gradient-to-tr from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-20" />
+
+        {/* Theme-Reactive Image (Smoothly animates on Dark/Light switch) */}
+        {!isFailed && activeCandidates.length > 0 ? (
+          <img
+            key={isDark ? 'dark-logo' : 'light-logo'}
+            src={activeCandidates[activeIdx]}
+            alt="GSV Monogram Logo"
+            onError={handleImgError}
+            className="w-full h-full object-cover block select-none transition-all duration-500 ease-out animate-[fadeIn_0.4s_ease-out]"
+          />
+        ) : (
+          <span
+            className={`font-display font-extrabold text-xs tracking-tighter ${
+              isDark ? 'text-[#F5F3EF]' : 'text-[#1C1917]'
+            }`}
+          >
+            GSV
+          </span>
+        )}
       </div>
 
       {/* Responsive Editorial Name Lockup */}
@@ -1646,12 +1596,13 @@ export default function App() {
               : 'bg-white/85 border-[#E7E5E0] shadow-[0_8px_30px_rgba(28,25,23,0.05)]'
           }`}
         >
-          {/* Left: Interlocked All-Caps "GSV" Monogram & Wordmark */}
+          {/* Left: Animated Dual-Theme Image Logo (logo_dark.png & logo_light.png) */}
           <GsvBrandLogo
             isDark={isDark}
             isScrolled={isNavScrolled}
             textMain={textMain}
             textSoft={textSoft}
+            baseUrl={baseUrl}
           />
 
           {/* Center: Recessed Inner Track with Concise Single-Word Links */}
