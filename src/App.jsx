@@ -18,26 +18,38 @@ function findBundledImage(keyword) {
   return null;
 }
 
-/* Prioritizes .png first (for AIRBNB.png, CAR.png, etc.) then .jpg/.jpeg */
-function buildImageCandidates(baseUrl, exactBaseName, searchKeyword) {
+function buildImageCandidates(baseUrl, exactBaseName, searchKeyword, preferJpg = false) {
   const bundled = findBundledImage(searchKeyword || exactBaseName);
   const lower = exactBaseName.toLowerCase();
   const upper = exactBaseName.toUpperCase();
-  return [
+
+  const pngFirst = [
     bundled,
     `${baseUrl}${exactBaseName}.png`,
     `${baseUrl}${exactBaseName}.jpg`,
     `${baseUrl}${exactBaseName}.jpeg`,
     `${baseUrl}${lower}.png`,
     `${baseUrl}${lower}.jpg`,
-    `${baseUrl}${lower}.jpeg`,
     `${baseUrl}${upper}.PNG`,
     `${baseUrl}${upper}.JPG`,
     `${baseUrl}assets/${exactBaseName}.png`,
     `${baseUrl}assets/${exactBaseName}.jpg`,
-    `${baseUrl}assets/${lower}.png`,
-    `${baseUrl}assets/${lower}.jpg`,
-  ].filter(Boolean);
+  ];
+
+  const jpgFirst = [
+    bundled,
+    `${baseUrl}${exactBaseName}.jpg`,
+    `${baseUrl}${exactBaseName}.png`,
+    `${baseUrl}${exactBaseName}.jpeg`,
+    `${baseUrl}${lower}.jpg`,
+    `${baseUrl}${lower}.png`,
+    `${baseUrl}${upper}.JPG`,
+    `${baseUrl}${upper}.PNG`,
+    `${baseUrl}assets/${exactBaseName}.jpg`,
+    `${baseUrl}assets/${exactBaseName}.png`,
+  ];
+
+  return (preferJpg ? jpgFirst : pngFirst).filter(Boolean);
 }
 
 const NOSTALGIC_STARS = [
@@ -56,6 +68,98 @@ const NOSTALGIC_STARS = [
   { top: '88%', left: '68%', size: 3, delay: '0.9s', duration: '6.6s', sparkle: false },
   { top: '93%', left: '38%', size: 2, delay: '3.9s', duration: '8.2s', sparkle: false },
 ];
+
+/* -------------------------------------------------------------------------- */
+/*  CUSTOM "GIRBAUD SKY VILLAREAL" (GSV) MONOGRAM & EDITORIAL WORDMARK LOGO   */
+/* -------------------------------------------------------------------------- */
+function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
+  return (
+    <a
+      href="#about"
+      className="flex items-center gap-2.5 sm:gap-3 group shrink-0 focus:outline-none"
+      aria-label="Girbaud Sky Villareal — Back to top"
+    >
+      {/* Bespoke GSV Orbital Monogram Emblem */}
+      <div
+        className={`relative flex items-center justify-center rounded-2xl border transition-all duration-500 ease-out group-hover:scale-105 ${
+          isScrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-9 h-9 sm:w-10 sm:h-10'
+        } ${
+          isDark
+            ? 'bg-gradient-to-br from-[#262421] to-[#161513] border-[#3A3632] text-[#F5F3EF] shadow-inner'
+            : 'bg-gradient-to-br from-[#1C1917] to-[#35312E] border-[#1C1917] text-[#FAF8F5] shadow-sm'
+        }`}
+      >
+        {/* Subtle Orbital Ring SVG + Sky Star Accent */}
+        <svg
+          className="absolute inset-0 w-full h-full p-1 opacity-35 transition-transform duration-700 group-hover:rotate-45"
+          viewBox="0 0 36 36"
+          fill="none"
+        >
+          <ellipse
+            cx="18"
+            cy="18"
+            rx="15"
+            ry="7.5"
+            transform="rotate(-28 18 18)"
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          <circle cx="29" cy="11" r="1.5" fill="currentColor" />
+        </svg>
+
+        {/* GSV Monogram Lockup */}
+        <div className="relative z-10 flex items-baseline leading-none select-none">
+          <span className="font-serif-editorial italic font-normal text-base sm:text-lg tracking-tighter">
+            G
+          </span>
+          <span className="font-display font-extrabold text-[8px] sm:text-[9px] tracking-tighter opacity-90 -ml-0.5">
+            SV
+          </span>
+        </div>
+
+        {/* Live Emerald Status Dot */}
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 ${
+            isDark ? 'border-[#1A1917]' : 'border-white'
+          }`}
+        />
+      </div>
+
+      {/* Responsive Editorial Name Lockup (Condenses cleanly on scroll) */}
+      <div className="flex flex-col justify-center min-w-0">
+        <div className="flex items-baseline gap-1 truncate">
+          <span
+            className={`font-display font-bold tracking-tight transition-all duration-500 ${
+              isScrolled ? 'text-xs sm:text-sm' : 'text-xs sm:text-[15px]'
+            } ${textMain}`}
+          >
+            Girbaud Sky
+          </span>
+          <span
+            className={`font-serif-editorial italic font-normal transition-all duration-500 ${
+              isScrolled
+                ? 'text-sm sm:text-base hidden xl:inline'
+                : 'text-sm sm:text-[17px]'
+            } ${textMain}`}
+          >
+            Villareal
+          </span>
+        </div>
+
+        {/* Subtitle smoothly collapses when navbar shrinks on scroll */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-out ${
+            isScrolled ? 'max-h-0 opacity-0' : 'max-h-4 opacity-100 mt-0.5'
+          }`}
+        >
+          <span className={`text-[9px] uppercase tracking-[0.16em] font-semibold block truncate ${textSoft}`}>
+            GSV • UI/UX & Front-End
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+}
 
 /* -------------------------------------------------------------------------- */
 /*  SOFT AESTHETIC SURFACE CARD                                               */
@@ -215,7 +319,6 @@ function AirbnbScrollableWebsitePreview({
           </a>
         </div>
 
-        {/* Viewport Controls: Magnifier Lens, Scroll Up/Down & Fullscreen Zoom */}
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
@@ -343,7 +446,7 @@ function AirbnbScrollableWebsitePreview({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  2-COLUMN FACEBOOK SHOWCASE (AVIDA.JPG ON LEFT + DETAILS ON RIGHT)         */
+/*  2-COLUMN FACEBOOK SHOWCASE (AVIDA.PNG ON LEFT + DETAILS ON RIGHT)         */
 /* -------------------------------------------------------------------------- */
 function FacebookSplitShowcase({
   facebookPageUrl,
@@ -353,7 +456,6 @@ function FacebookSplitShowcase({
   textMain,
   textSub,
   textSoft,
-  borderLine,
   pillBg,
   onCopyNumber,
   onOpenPosterLightbox,
@@ -365,7 +467,7 @@ function FacebookSplitShowcase({
   return (
     <div className={isDark ? 'bg-[#151412]' : 'bg-[#F7F5F0]'}>
       <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-        {/* LEFT COLUMN (7 COLS): AVIDA.JPG POSTER IMAGE (CLICK TO MAGNIFY) */}
+        {/* LEFT COLUMN (7 COLS): AVIDA POSTER IMAGE (CLICK TO MAGNIFY) */}
         <div className="lg:col-span-7">
           {!failed && valid.length > 0 ? (
             <div
@@ -398,7 +500,7 @@ function FacebookSplitShowcase({
                   FOR LEASE: ₱19,000 / Month
                 </div>
                 <p className="text-xs text-zinc-700">
-                  Place <strong>AVIDA.jpg</strong> inside your <code>public/</code> folder to display the full poster image here.
+                  Place <strong>AVIDA.png</strong> inside your <code>public/</code> folder to display the full poster image here.
                 </p>
               </div>
             </div>
@@ -425,7 +527,6 @@ function FacebookSplitShowcase({
             <strong>₱19,000 / month</strong> (inclusive of Association Dues), right next to Ayala Malls Arca South & Landers Superstore.
           </p>
 
-          {/* Unit Highlights & Terms Box */}
           <div
             className={`p-4 rounded-2xl border space-y-2 text-xs ${
               isDark ? 'bg-[#1A1917] border-[#2E2C29]' : 'bg-white border-[#E7E5E0] shadow-sm'
@@ -443,7 +544,6 @@ function FacebookSplitShowcase({
             </ul>
           </div>
 
-          {/* One-Click Copy Inquiry Numbers */}
           <div className="space-y-1.5">
             <div className={`text-[10px] uppercase tracking-wider font-semibold ${textSoft}`}>
               Direct Inquiries (Click to Copy Viber / WhatsApp):
@@ -473,7 +573,6 @@ function FacebookSplitShowcase({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <a
               href={facebookPageUrl}
@@ -790,7 +889,8 @@ export default function App() {
   });
 
   const baseUrl = import.meta.env.BASE_URL;
-  const portraitCandidates = buildImageCandidates(baseUrl, 'profile', 'profile');
+  /* Checks profile.jpg first so Chrome Console never logs a profile.png 404 */
+  const portraitCandidates = buildImageCandidates(baseUrl, 'profile', 'profile', true);
   const [portraitIdx, setPortraitIdx] = useState(0);
   const [photoError, setPhotoError] = useState(false);
   const resumePdfUrl = `${baseUrl}resume.pdf`;
@@ -804,8 +904,10 @@ export default function App() {
   const [titleIndex, setTitleIndex] = useState(0);
   const [isTitleFading, setIsTitleFading] = useState(false);
 
+  /* Navigation & Scroll-Shrink State */
   const [timeString, setTimeString] = useState('');
   const [activeNav, setActiveNav] = useState('about');
+  const [isNavScrolled, setIsNavScrolled] = useState(false);
   const [copiedLabel, setCopiedLabel] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -1000,7 +1102,7 @@ export default function App() {
       date: 'Completed Jan 31, 2026',
       credentialId: 'Instructor: John Philip Tan',
       badge: 'Cisco Verified',
-      candidates: buildImageCandidates(baseUrl, 'CISCOCERT', 'cisco'),
+      candidates: buildImageCandidates(baseUrl, 'CISCOCERT', 'cisco', true),
       description:
         'Successfully completed training in data science principles, analytics workflows, and modern data-driven decision systems.',
       tags: ['Data Science', 'Analytics', 'Cisco NetAcad', 'DICT-ITU'],
@@ -1012,7 +1114,7 @@ export default function App() {
       date: 'Given Feb 5, 2026',
       credentialId: 'ISSOC Webinar Series',
       badge: 'AI Literacy',
-      candidates: buildImageCandidates(baseUrl, 'NCBA', 'ncba'),
+      candidates: buildImageCandidates(baseUrl, 'NCBA', 'ncba', true),
       description:
         'Recognized for active participation in essential AI literacy skills, ethical usage, and responsible exploration of AI in education and digital innovation.',
       tags: ['AI Literacy', 'Responsible AI', 'Digital Innovation'],
@@ -1144,8 +1246,11 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
+  /* Scroll Spy + PHASED-Style Shrinking Navbar Trigger */
   useEffect(() => {
     const handleScroll = () => {
+      setIsNavScrolled(window.scrollY > 45);
+
       const sections = [
         'about',
         'process',
@@ -1169,6 +1274,7 @@ export default function App() {
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -1339,6 +1445,18 @@ export default function App() {
     },
   ];
 
+  /* Concise Single-Word Navigation Links (Zero Crowding!) */
+  const navItems = [
+    { id: 'about', label: 'About' },
+    { id: 'process', label: 'Process' },
+    { id: 'work', label: 'PHASED' },
+    { id: 'ui-works', label: 'UI Studio' },
+    { id: 'hosting', label: 'Condo' },
+    { id: 'experience', label: 'Resume' },
+    { id: 'certifications', label: 'Certs' },
+    { id: 'ratings', label: 'Reviews' },
+  ];
+
   const textMain = isDark ? 'text-[#F5F3EF]' : 'text-[#1C1917]';
   const textSub = isDark ? 'text-[#A8A29E]' : 'text-[#57534E]';
   const textSoft = 'text-[#78716C]';
@@ -1441,74 +1559,77 @@ export default function App() {
         <span>Copied {copiedLabel} to clipboard</span>
       </div>
 
-      {/* FLOATING NAVIGATION BAR */}
-      <header className="sticky top-3 sm:top-4 z-40 max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 pt-1">
+      {/* ==================================================================== */}
+      {/*  PHASED-STYLE SCROLL-SHRINKING FLOATING NAVIGATION BAR               */}
+      {/* ==================================================================== */}
+      <header className="sticky top-3 sm:top-4 z-40 px-3 sm:px-6 lg:px-8 pointer-events-none">
         <div
-          className={`backdrop-blur-2xl rounded-full px-3.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between border transition-all duration-500 ${
+          className={`pointer-events-auto mx-auto transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full border flex items-center justify-between gap-2 ${
+            isNavScrolled
+              ? 'max-w-4xl h-12 sm:h-13 px-3 sm:px-4 backdrop-blur-2xl shadow-2xl'
+              : 'max-w-6xl h-14 sm:h-16 px-4 sm:px-6 backdrop-blur-xl shadow-lg'
+          } ${
             isDark
-              ? 'bg-[#1A1917]/85 border-[#2E2C29] shadow-2xl shadow-black/50'
-              : 'bg-white/85 border-[#E7E5E0] shadow-[0_8px_30px_rgb(0,0,0,0.04)]'
+              ? isNavScrolled
+                ? 'bg-[#161513]/95 border-[#35322F] shadow-black/70'
+                : 'bg-[#1A1917]/80 border-[#2E2C29] shadow-black/40'
+              : isNavScrolled
+              ? 'bg-white/95 border-[#D6D3CD] shadow-[0_12px_35px_rgba(28,25,23,0.1)]'
+              : 'bg-white/80 border-[#E7E5E0] shadow-[0_8px_30px_rgba(28,25,23,0.04)]'
           }`}
         >
-          <a href="#about" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-            <div
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-serif-editorial italic text-base sm:text-lg shrink-0 transition-transform duration-300 group-hover:scale-105 ${
-                isDark ? 'bg-[#F5F3EF] text-[#121110]' : 'bg-[#1C1917] text-[#FAF8F5]'
-              }`}
-            >
-              G
-            </div>
-            <div className="truncate">
-              <span className={`font-display font-bold text-xs sm:text-sm tracking-tight block truncate ${textMain}`}>
-                Girbaud Sky Villareal
-              </span>
-              <span className={`text-[10px] sm:text-[11px] hidden sm:block truncate ${textSoft}`}>
-                UI/UX • Front-End • Tech Exec • Property Host
-              </span>
-            </div>
-          </a>
+          {/* Left: Custom "Girbaud Sky Villareal" (GSV) Monogram & Wordmark */}
+          <GsvBrandLogo
+            isDark={isDark}
+            isScrolled={isNavScrolled}
+            textMain={textMain}
+            textSoft={textSoft}
+          />
 
-          <nav className="hidden lg:flex items-center gap-0.5">
-            {[
-              { id: 'about', label: 'About' },
-              { id: 'process', label: 'Process' },
-              { id: 'work', label: 'PHASED' },
-              { id: 'ui-works', label: 'UI Designs' },
-              { id: 'hosting', label: 'Airbnb & FB' },
-              { id: 'experience', label: 'Resume/CV' },
-              { id: 'certifications', label: 'Certificates' },
-              { id: 'ratings', label: 'Ratings' },
-            ].map((item) => (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap ${
-                  activeNav === item.id
-                    ? isDark
-                      ? 'bg-[#F5F3EF] text-[#121110] font-semibold'
-                      : 'bg-[#1C1917] text-[#FAF8F5] font-semibold'
-                    : `${textSub} hover:${textMain}`
-                }`}
-              >
-                {item.label}
-              </a>
-            ))}
+          {/* Center: Recessed Inner Track with Concise Single-Word Links */}
+          <nav
+            className={`hidden lg:flex items-center gap-0.5 p-1 rounded-full border transition-all duration-500 ${
+              isDark
+                ? 'bg-[#121110]/70 border-[#292724]'
+                : 'bg-[#F5F3EE]/85 border-[#E7E5E0]'
+            }`}
+          >
+            {navItems.map((item) => {
+              const isActive =
+                activeNav === item.id ||
+                (item.id === 'certifications' && activeNav === 'capabilities');
+              return (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className={`rounded-full font-medium transition-all duration-300 whitespace-nowrap ${
+                    isNavScrolled
+                      ? 'px-2.5 py-1 text-[11px]'
+                      : 'px-3 py-1.5 text-xs'
+                  } ${
+                    isActive
+                      ? isDark
+                        ? 'bg-[#F5F3EF] text-[#121110] font-semibold shadow-sm'
+                        : 'bg-[#1C1917] text-[#FAF8F5] font-semibold shadow-sm'
+                      : `${textSub} hover:${textMain}`
+                  }`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </nav>
 
+          {/* Right: Clean, Uncrowded Action Cluster (Theme Toggle + Let's Talk) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <a
-              href={resumePdfUrl}
-              download="Girbaud_Sky_Villareal_Resume_CV.pdf"
-              className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${pillBg}`}
-            >
-              <span>Resume/CV</span>
-              <span>↓</span>
-            </a>
-
             <button
+              type="button"
               onClick={() => setIsDark(!isDark)}
               aria-label="Toggle color theme"
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-all duration-300 ${
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className={`rounded-full border flex items-center justify-center transition-all duration-300 ${
+                isNavScrolled ? 'w-8 h-8 text-xs' : 'w-8 h-8 sm:w-9 sm:h-9 text-sm'
+              } ${
                 isDark
                   ? 'bg-[#242220] border-[#35322F] text-amber-200 hover:bg-[#2E2C29]'
                   : 'bg-[#F3F1EC] border-[#E5E2DC] text-[#44403C] hover:bg-[#E7E5E0]'
@@ -1519,7 +1640,11 @@ export default function App() {
 
             <a
               href="mailto:girbaudforwork@gmail.com"
-              className={`hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-display font-semibold transition-all duration-300 ${
+              className={`hidden sm:inline-flex items-center gap-1.5 rounded-full font-display font-semibold transition-all duration-300 whitespace-nowrap ${
+                isNavScrolled
+                  ? 'px-3.5 py-1.5 text-[11px]'
+                  : 'px-4 py-2 text-xs'
+              } ${
                 isDark
                   ? 'bg-[#F5F3EF] text-[#121110] hover:bg-white'
                   : 'bg-[#1C1917] text-[#FAF8F5] hover:bg-[#35312E]'
@@ -1529,7 +1654,9 @@ export default function App() {
               <span>↗</span>
             </a>
 
+            {/* Mobile & Tablet Menu Button */}
             <button
+              type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center ${
                 isDark ? 'border-[#2E2C29] text-[#F5F3EF]' : 'border-[#E7E5E0] text-[#1C1917]'
@@ -1548,43 +1675,39 @@ export default function App() {
           </div>
         </div>
 
-        {/* Mobile Drawer */}
-        <div className={`lg:hidden accordion-grid ${isMobileMenuOpen ? 'open mt-2' : ''}`}>
+        {/* Mobile & Tablet Dropdown Drawer */}
+        <div
+          className={`pointer-events-auto lg:hidden max-w-xl mx-auto accordion-grid ${
+            isMobileMenuOpen ? 'open mt-2' : ''
+          }`}
+        >
           <div className="accordion-inner">
             <div
               className={`p-4 rounded-3xl border backdrop-blur-2xl shadow-xl space-y-1.5 ${
                 isDark ? 'bg-[#1A1917]/95 border-[#2E2C29]' : 'bg-white/95 border-[#E7E5E0]'
               }`}
             >
-              {[
-                { id: 'about', label: 'About & Links' },
-                { id: 'process', label: 'Design Process' },
-                { id: 'work', label: 'Featured System (PHASED)' },
-                { id: 'ui-works', label: 'UI Design Works Carousel (5)' },
-                { id: 'hosting', label: 'Airbnb & Facebook Preview' },
-                { id: 'experience', label: 'Experience & Resume/CV' },
-                { id: 'certifications', label: 'Verified Certifications (3)' },
-                { id: 'capabilities', label: 'Capabilities & Skills' },
-                { id: 'ratings', label: 'Performance Ratings' },
-              ].map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-display font-semibold transition-colors ${
-                    activeNav === item.id ? pillBg : textMain
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
+              <div className="grid grid-cols-2 gap-1.5">
+                {navItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`px-3.5 py-2.5 rounded-2xl text-xs font-display font-semibold transition-colors ${
+                      activeNav === item.id ? pillBg : textMain
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
               <div className="pt-2 flex gap-2">
                 <a
                   href={resumePdfUrl}
                   download="Girbaud_Sky_Villareal_Resume_CV.pdf"
                   className={`flex-1 text-center py-2.5 rounded-2xl text-xs font-display font-semibold border ${pillBg}`}
                 >
-                  Download Resume/CV ↓
+                  Resume/CV ↓
                 </a>
                 <a
                   href="mailto:girbaudforwork@gmail.com"
@@ -1649,6 +1772,7 @@ export default function App() {
               <div className="reveal pt-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                   <button
+                    type="button"
                     onClick={() => copyToClipboard('girbaudforwork@gmail.com', 'email address')}
                     className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border text-left transition-all duration-300 group ${
                       isDark
@@ -1668,6 +1792,7 @@ export default function App() {
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => copyToClipboard('+639206290342', 'phone number')}
                     className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border text-left transition-all duration-300 group ${
                       isDark
@@ -1827,6 +1952,7 @@ export default function App() {
               return (
                 <AestheticCard key={item.step} isDark={isDark}>
                   <button
+                    type="button"
                     onClick={() => setOpenProcessIdx(isOpen ? -1 : idx)}
                     className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4"
                   >
@@ -1924,6 +2050,7 @@ export default function App() {
                     { id: 'ux', label: 'Architecture & UX' },
                   ].map((tab) => (
                     <button
+                      type="button"
                       key={tab.id}
                       onClick={() => setPhasedView(tab.id)}
                       className={`px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium transition-all whitespace-nowrap ${
@@ -2340,7 +2467,7 @@ export default function App() {
               />
             )}
 
-            {/* 2B. FACEBOOK TAB: 2-COLUMN LAYOUT (AVIDA.JPG ON LEFT + DETAILS ON RIGHT) */}
+            {/* 2B. FACEBOOK TAB: 2-COLUMN LAYOUT (AVIDA POSTER ON LEFT + DETAILS ON RIGHT) */}
             {arcaView === 'facebook' && (
               <FacebookSplitShowcase
                 facebookPageUrl={facebookPageUrl}
@@ -2476,6 +2603,7 @@ export default function App() {
                   { id: 'education', label: 'Education & Community' },
                 ].map((tab) => (
                   <button
+                    type="button"
                     key={tab.id}
                     onClick={() => setCvFilter(tab.id)}
                     className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
@@ -2514,6 +2642,7 @@ export default function App() {
                     className={isHighlighted ? 'ring-2 ring-emerald-500/50' : ''}
                   >
                     <button
+                      type="button"
                       onClick={() => toggleExpAccordion(exp.id)}
                       className="w-full p-5 sm:p-6 text-left flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                     >
@@ -2561,6 +2690,7 @@ export default function App() {
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {exp.tags.map((tag) => (
                               <button
+                                type="button"
                                 key={tag}
                                 onClick={() => setSelectedSkill(selectedSkill === tag ? null : tag)}
                                 className={`px-3 py-1 rounded-full text-[11px] border transition-all ${
@@ -2918,6 +3048,7 @@ export default function App() {
                           className={`text-xl transition-transform duration-200 hover:scale-125 focus:outline-none ${
                             active ? 'text-amber-400' : 'text-stone-400/40'
                           }`}
+                          aria-label={`Rate ${star} out of 5 stars`}
                         >
                           ★
                         </button>
@@ -2949,6 +3080,9 @@ export default function App() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
+                    id="reviewer-name"
+                    name="reviewerName"
+                    aria-label="Your Name"
                     type="text"
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
@@ -2956,6 +3090,9 @@ export default function App() {
                     className={`w-full px-4 py-2.5 rounded-2xl text-xs sm:text-sm border bg-transparent focus:outline-none ${borderLine} ${textMain}`}
                   />
                   <input
+                    id="reviewer-role"
+                    name="reviewerRole"
+                    aria-label="Role or Company"
                     type="text"
                     value={reviewerRole}
                     onChange={(e) => setReviewerRole(e.target.value)}
@@ -2965,6 +3102,9 @@ export default function App() {
                 </div>
 
                 <textarea
+                  id="review-comment"
+                  name="reviewComment"
+                  aria-label="Feedback comment"
                   rows={3}
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
