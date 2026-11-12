@@ -79,7 +79,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
       className="flex items-center gap-2.5 sm:gap-3 group shrink-0 focus:outline-none"
       aria-label="Girbaud Sky Villareal — Back to top"
     >
-      {/* Bespoke GSV Orbital Monogram Emblem */}
       <div
         className={`relative flex items-center justify-center rounded-2xl border transition-all duration-500 ease-out group-hover:scale-105 ${
           isScrolled ? 'w-8 h-8 sm:w-9 sm:h-9' : 'w-9 h-9 sm:w-10 sm:h-10'
@@ -89,7 +88,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
             : 'bg-gradient-to-br from-[#1C1917] to-[#35312E] border-[#1C1917] text-[#FAF8F5] shadow-sm'
         }`}
       >
-        {/* Subtle Orbital Ring SVG + Sky Star Accent */}
         <svg
           className="absolute inset-0 w-full h-full p-1 opacity-35 transition-transform duration-700 group-hover:rotate-45"
           viewBox="0 0 36 36"
@@ -107,7 +105,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
           <circle cx="29" cy="11" r="1.5" fill="currentColor" />
         </svg>
 
-        {/* GSV Monogram Lockup */}
         <div className="relative z-10 flex items-baseline leading-none select-none">
           <span className="font-serif-editorial italic font-normal text-base sm:text-lg tracking-tighter">
             G
@@ -117,7 +114,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
           </span>
         </div>
 
-        {/* Live Emerald Status Dot */}
         <span
           className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 ${
             isDark ? 'border-[#1A1917]' : 'border-white'
@@ -125,7 +121,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
         />
       </div>
 
-      {/* Responsive Editorial Name Lockup (Condenses cleanly on scroll) */}
       <div className="flex flex-col justify-center min-w-0">
         <div className="flex items-baseline gap-1 truncate">
           <span
@@ -146,7 +141,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft }) {
           </span>
         </div>
 
-        {/* Subtitle smoothly collapses when navbar shrinks on scroll */}
         <div
           className={`overflow-hidden transition-all duration-500 ease-out ${
             isScrolled ? 'max-h-0 opacity-0' : 'max-h-4 opacity-100 mt-0.5'
@@ -299,7 +293,6 @@ function AirbnbScrollableWebsitePreview({
 
   return (
     <div className="flex flex-col w-full">
-      {/* Slim Interactive Website Toolbar */}
       <div
         className={`px-4 sm:px-6 py-2.5 border-b flex flex-wrap items-center justify-between gap-2 text-xs ${borderLine} ${
           isDark ? 'bg-[#141311]' : 'bg-[#F5F3EE]'
@@ -360,7 +353,6 @@ function AirbnbScrollableWebsitePreview({
         </div>
       </div>
 
-      {/* Live Scroll Progress Bar */}
       <div className={`h-[3px] w-full ${isDark ? 'bg-[#242220]' : 'bg-[#E5E2DC]'}`}>
         <div
           className="h-full bg-[#FF385C] transition-all duration-150"
@@ -368,7 +360,6 @@ function AirbnbScrollableWebsitePreview({
         />
       </div>
 
-      {/* Main Scrollable Website Viewport (Renders AIRBNB.png at 100% Full Width) */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -398,7 +389,6 @@ function AirbnbScrollableWebsitePreview({
               className="w-full h-auto block select-none"
             />
 
-            {/* 2.2x Hover Magnifying Lens */}
             {magnifyOn && lens.visible && (
               <div
                 className="pointer-events-none absolute w-48 h-48 rounded-full border-2 border-[#FF385C] shadow-[0_15px_40px_rgba(0,0,0,0.65)] z-30"
@@ -424,7 +414,6 @@ function AirbnbScrollableWebsitePreview({
           </div>
         )}
 
-        {/* Floating Bottom Bar: Scroll Indicator + Direct Airbnb Link */}
         <div className="sticky bottom-3 left-0 right-0 px-4 flex items-center justify-between pointer-events-none z-20">
           <span className="px-3.5 py-1.5 rounded-full backdrop-blur-md bg-black/70 text-white text-[11px] font-medium shadow-lg">
             ↕ Scroll to explore full Airbnb page {scrollPct > 0 ? `(${scrollPct}%)` : ''}
@@ -467,7 +456,6 @@ function FacebookSplitShowcase({
   return (
     <div className={isDark ? 'bg-[#151412]' : 'bg-[#F7F5F0]'}>
       <div className="p-5 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-        {/* LEFT COLUMN (7 COLS): AVIDA POSTER IMAGE (CLICK TO MAGNIFY) */}
         <div className="lg:col-span-7">
           {!failed && valid.length > 0 ? (
             <div
@@ -507,7 +495,6 @@ function FacebookSplitShowcase({
           )}
         </div>
 
-        {/* RIGHT COLUMN (5 COLS): FACEBOOK PAGE DETAILS, HIGHLIGHTS & INQUIRIES */}
         <div className="lg:col-span-5 space-y-4">
           <div className="space-y-1.5">
             <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#1877F2]/15 text-[#1877F2] border border-[#1877F2]/30">
@@ -889,7 +876,6 @@ export default function App() {
   });
 
   const baseUrl = import.meta.env.BASE_URL;
-  /* Checks profile.jpg first so Chrome Console never logs a profile.png 404 */
   const portraitCandidates = buildImageCandidates(baseUrl, 'profile', 'profile', true);
   const [portraitIdx, setPortraitIdx] = useState(0);
   const [photoError, setPhotoError] = useState(false);
@@ -914,7 +900,7 @@ export default function App() {
   const [openProcessIdx, setOpenProcessIdx] = useState(0);
   const [openExpIds, setOpenExpIds] = useState(['villman', 'arca-host', 'undecide']);
   const [phasedView, setPhasedView] = useState('live');
-  const [arcaView, setArcaView] = useState('airbnb'); // 'airbnb' | 'facebook' | 'details'
+  const [arcaView, setArcaView] = useState('airbnb');
 
   const [uiCategoryFilter, setUiCategoryFilter] = useState('all');
   const [activeUiSlide, setActiveUiSlide] = useState(0);
@@ -927,7 +913,6 @@ export default function App() {
   const [cvFilter, setCvFilter] = useState('all');
   const [selectedSkill, setSelectedSkill] = useState(null);
 
-  /* Exact Airbnb & Facebook Links + Image Candidates */
   const airbnbRoomUrl =
     'https://www.airbnb.com/rooms/1790979755480894562?guests=1&adults=1&s=67&unique_share_id=12659c23-ca20-49e5-8666-7e455be2320d&source_impression_id=p3_1793973358_P3XeULVGRC-tQlS8';
   const airbnbShortUrl = 'airbnb.com/h/cozystudioarcasouth';
@@ -1246,10 +1231,15 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
-  /* Scroll Spy + PHASED-Style Shrinking Navbar Trigger */
+  /* Scroll Spy + PHASED-Style Shrinking Fixed Navbar Trigger */
   useEffect(() => {
     const handleScroll = () => {
-      setIsNavScrolled(window.scrollY > 45);
+      const scrollTop =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0;
+      setIsNavScrolled(scrollTop > 40);
 
       const sections = [
         'about',
@@ -1445,7 +1435,6 @@ export default function App() {
     },
   ];
 
-  /* Concise Single-Word Navigation Links (Zero Crowding!) */
   const navItems = [
     { id: 'about', label: 'About' },
     { id: 'process', label: 'Process' },
@@ -1560,9 +1549,9 @@ export default function App() {
       </div>
 
       {/* ==================================================================== */}
-      {/*  PHASED-STYLE SCROLL-SHRINKING FLOATING NAVIGATION BAR               */}
+      {/*  FIXED SCROLL-FOLLOWING & SHRINKING NAVIGATION BAR                   */}
       {/* ==================================================================== */}
-      <header className="sticky top-3 sm:top-4 z-40 px-3 sm:px-6 lg:px-8 pointer-events-none">
+      <header className="fixed top-3 sm:top-4 inset-x-0 z-50 px-3 sm:px-6 lg:px-8 pointer-events-none">
         <div
           className={`pointer-events-auto mx-auto transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full border flex items-center justify-between gap-2 ${
             isNavScrolled
@@ -1571,11 +1560,11 @@ export default function App() {
           } ${
             isDark
               ? isNavScrolled
-                ? 'bg-[#161513]/95 border-[#35322F] shadow-black/70'
-                : 'bg-[#1A1917]/80 border-[#2E2C29] shadow-black/40'
+                ? 'bg-[#161513]/95 border-[#35322F] shadow-black/75'
+                : 'bg-[#1A1917]/85 border-[#2E2C29] shadow-black/45'
               : isNavScrolled
-              ? 'bg-white/95 border-[#D6D3CD] shadow-[0_12px_35px_rgba(28,25,23,0.1)]'
-              : 'bg-white/80 border-[#E7E5E0] shadow-[0_8px_30px_rgba(28,25,23,0.04)]'
+              ? 'bg-white/95 border-[#D6D3CD] shadow-[0_12px_35px_rgba(28,25,23,0.12)]'
+              : 'bg-white/85 border-[#E7E5E0] shadow-[0_8px_30px_rgba(28,25,23,0.05)]'
           }`}
         >
           {/* Left: Custom "Girbaud Sky Villareal" (GSV) Monogram & Wordmark */}
@@ -1620,7 +1609,7 @@ export default function App() {
             })}
           </nav>
 
-          {/* Right: Clean, Uncrowded Action Cluster (Theme Toggle + Let's Talk) */}
+          {/* Right: Clean Action Cluster (Theme Toggle + Let's Talk) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
@@ -1723,8 +1712,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-14 pb-24 space-y-20 sm:space-y-28 relative z-10">
+      {/* MAIN CONTAINER (With top clearance pt-24 sm:pt-32 for fixed navbar) */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-24 space-y-20 sm:space-y-28 relative z-10">
         
         {/* SECTION 1: HERO & COMPACT PERMANENT PORTRAIT */}
         <section id="about" className="scroll-mt-24">
