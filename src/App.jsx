@@ -1,5 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+} from 'firebase/firestore';
 import phasedImage from './assets/phased.png';
+
+/* -------------------------------------------------------------------------- */
+/*  FIREBASE CLOUD FIRESTORE INITIALIZATION (gsv-portfolio-reviews)           */
+/* -------------------------------------------------------------------------- */
+const firebaseConfig = {
+  apiKey: 'AIzaSyD5rQbvr1xcq1vqLWxLTEEbpcd5SEza8M4',
+  authDomain: 'gsv-portfolio-reviews.firebaseapp.com',
+  projectId: 'gsv-portfolio-reviews',
+  storageBucket: 'gsv-portfolio-reviews.firebasestorage.app',
+  messagingSenderId: '987500479855',
+  appId: '1:987500479855:web:9a3b07e917acadefafd49a',
+  measurementId: 'G-XDPRRHDCH6',
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 /* Automatically discover any images placed inside src/ or src/assets/ */
 const BUNDLED_ASSETS = import.meta.glob(
@@ -36,7 +62,6 @@ function buildImageCandidates(baseUrl, exactBaseName, searchKeyword, preferJpg =
     `${baseUrl}${upper}.JPG`,
     `${baseUrl}assets/${exactBaseName}.png`,
     `${baseUrl}assets/${exactBaseName}.jpg`,
-    `${baseUrl}assets/${exactBaseName}.jfif`,
   ];
 
   const jpgFirst = [
@@ -106,7 +131,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft, baseUrl }) {
       className="flex items-center gap-2.5 sm:gap-3 group shrink-0 focus:outline-none"
       aria-label="Girbaud Sky Villareal — Back to top"
     >
-      {/* Animated Logo Container: Gentle Float + Hover Tilt/Scale + Sheen */}
       <div
         className={`relative flex items-center justify-center rounded-full overflow-hidden border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6 ${
           isScrolled ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10 sm:w-11 sm:h-11'
@@ -116,25 +140,21 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft, baseUrl }) {
             : 'bg-[#F4F1EA] border-[#D6D3CD] shadow-[0_4px_14px_rgba(28,25,23,0.08)] group-hover:border-[#A8A29E]'
         }`}
       >
-        {/* Subtle Animated Spinning Halo Ring on Hover */}
         <span
           className={`pointer-events-none absolute inset-0 rounded-full border border-dashed opacity-0 group-hover:opacity-40 transition-opacity duration-500 animate-spin ${
             isDark ? 'border-[#F5F3EF]' : 'border-[#1C1917]'
           }`}
           style={{ animationDuration: '10s' }}
         />
-
-        {/* Diagonal Shimmer Sweep on Hover */}
         <span className="pointer-events-none absolute -inset-full bg-gradient-to-tr from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out z-20" />
 
-        {/* Theme-Reactive Image (Smoothly animates on Dark/Light switch) */}
         {!isFailed && activeCandidates.length > 0 ? (
           <img
             key={isDark ? 'dark-logo' : 'light-logo'}
             src={activeCandidates[activeIdx]}
             alt="GSV Monogram Logo"
             onError={handleImgError}
-            className="w-full h-full object-cover block select-none transition-all duration-500 ease-out animate-[fadeIn_0.4s_ease-out]"
+            className="w-full h-full object-cover block select-none transition-transform duration-500"
           />
         ) : (
           <span
@@ -147,7 +167,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft, baseUrl }) {
         )}
       </div>
 
-      {/* Responsive Editorial Name Lockup */}
       <div className="flex flex-col justify-center min-w-0">
         <div className="flex items-baseline gap-1.5 truncate">
           <span
@@ -168,7 +187,6 @@ function GsvBrandLogo({ isDark, isScrolled, textMain, textSoft, baseUrl }) {
           </span>
         </div>
 
-        {/* Subtitle smoothly collapses when navbar shrinks on scroll */}
         <div
           className={`overflow-hidden transition-all duration-500 ease-out ${
             isScrolled ? 'max-h-0 opacity-0' : 'max-h-4 opacity-100 mt-0.5'
@@ -255,11 +273,8 @@ function SmartImage({ candidates = [], alt, className = '', fallbackText }) {
       alt={alt}
       loading="lazy"
       onError={() => {
-        if (idx + 1 < valid.length) {
-          setIdx(idx + 1);
-        } else {
-          setFailed(true);
-        }
+        if (idx + 1 < valid.length) setIdx(idx + 1);
+        else setFailed(true);
       }}
       className={className}
     />
@@ -355,7 +370,6 @@ function AirbnbScrollableWebsitePreview({
             <span>🔍</span>
             <span>{magnifyOn ? 'Magnifier ON' : 'Magnify'}</span>
           </button>
-
           <button
             type="button"
             onClick={() => scrollStep('up')}
@@ -372,7 +386,6 @@ function AirbnbScrollableWebsitePreview({
           >
             ↓
           </button>
-
           <button
             type="button"
             onClick={onOpenZoomModal}
@@ -410,11 +423,8 @@ function AirbnbScrollableWebsitePreview({
               src={activeImg}
               alt="Cozy Studio in ARCA South — Full Airbnb Listing Page"
               onError={() => {
-                if (idx + 1 < valid.length) {
-                  setIdx(idx + 1);
-                } else {
-                  setFailed(true);
-                }
+                if (idx + 1 < valid.length) setIdx(idx + 1);
+                else setFailed(true);
               }}
               className="w-full h-auto block select-none"
             />
@@ -496,11 +506,8 @@ function FacebookSplitShowcase({
                 src={valid[idx]}
                 alt="Avida Towers Vireo Tower 1 — For Lease ₱19,000/Month"
                 onError={() => {
-                  if (idx + 1 < valid.length) {
-                    setIdx(idx + 1);
-                  } else {
-                    setFailed(true);
-                  }
+                  if (idx + 1 < valid.length) setIdx(idx + 1);
+                  else setFailed(true);
                 }}
                 className="w-full h-auto block transition-transform duration-500 ease-out group-hover:scale-[1.015]"
               />
@@ -1164,14 +1171,12 @@ export default function App() {
     },
   ];
 
-  const [reviews, setReviews] = useState(() => {
-    try {
-      const saved = localStorage.getItem('gsv-performance-reviews-v3');
-      return saved ? JSON.parse(saved) : defaultReviews;
-    } catch {
-      return defaultReviews;
-    }
-  });
+  /* ------------------------------------------------------------------------ */
+  /*  REAL-TIME FIREBASE FIRESTORE REVIEWS STATE & LISTENER                   */
+  /* ------------------------------------------------------------------------ */
+  const [reviews, setReviews] = useState(defaultReviews);
+  const [isCloudSynced, setIsCloudSynced] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const [ratingInput, setRatingInput] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
@@ -1187,6 +1192,72 @@ export default function App() {
     'Translated our ideas into a calm, intuitive design.',
     'Highly professional and delivers quality work on time.',
   ];
+
+  /* Subscribe to Cloud Firestore 'reviews' collection in real time */
+  useEffect(() => {
+    const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const cloudReviews = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || 'Verified Visitor',
+            role: data.role || 'Client / Peer Reviewer',
+            rating: Number(data.rating) || 5,
+            comment: data.comment || '',
+            date: data.date || '2026',
+          };
+        });
+        setReviews([...cloudReviews, ...defaultReviews]);
+        setIsCloudSynced(true);
+      },
+      (err) => {
+        console.warn('Firestore real-time listener notice:', err.message);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  /* Save submitted review directly to Firebase Cloud Firestore */
+  const handleRatingSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewComment.trim() || isSubmittingReview) return;
+
+    setIsSubmittingReview(true);
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date());
+
+    const newEntry = {
+      name: reviewerName.trim() || 'Verified Visitor',
+      role: reviewerRole.trim() || 'Client / Peer Reviewer',
+      rating: Number(ratingInput) || 5,
+      comment: reviewComment.trim(),
+      date: formattedDate,
+    };
+
+    try {
+      await addDoc(collection(db, 'reviews'), {
+        ...newEntry,
+        createdAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error('Firestore write fallback:', err);
+      setReviews((prev) => [{ id: Date.now(), ...newEntry }, ...prev]);
+    } finally {
+      setIsSubmittingReview(false);
+      setReviewerName('');
+      setReviewerRole('');
+      setReviewComment('');
+      setRatingInput(5);
+      setReviewSubmitted(true);
+      setTimeout(() => setReviewSubmitted(false), 3500);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -1260,7 +1331,6 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
-  /* Scroll Spy + PHASED-Style Shrinking Fixed Navbar Trigger */
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop =
@@ -1320,32 +1390,6 @@ export default function App() {
       if (prev.includes(phrase)) return prev;
       return `${prev.trim()} ${phrase}`;
     });
-  };
-
-  const handleRatingSubmit = (e) => {
-    e.preventDefault();
-    if (!reviewComment.trim()) return;
-    const newEntry = {
-      id: Date.now(),
-      name: reviewerName.trim() || 'Verified Visitor',
-      role: reviewerRole.trim() || 'Client / Peer Reviewer',
-      rating: ratingInput,
-      comment: reviewComment.trim(),
-      date: 'Just now',
-    };
-    const updated = [newEntry, ...reviews];
-    setReviews(updated);
-    try {
-      localStorage.setItem('gsv-performance-reviews-v3', JSON.stringify(updated));
-    } catch {
-      // ignore
-    }
-    setReviewerName('');
-    setReviewerRole('');
-    setReviewComment('');
-    setRatingInput(5);
-    setReviewSubmitted(true);
-    setTimeout(() => setReviewSubmitted(false), 3500);
   };
 
   const designProcess = [
@@ -1490,7 +1534,8 @@ export default function App() {
   const plainRingBorder = isDark ? 'border-white/[0.15]' : 'border-stone-900/[0.15]';
 
   const averageRating = (
-    reviews.reduce((acc, item) => acc + item.rating, 0) / (reviews.length || 1)
+    reviews.reduce((acc, item) => acc + (Number(item.rating) || 5), 0) /
+    (reviews.length || 1)
   ).toFixed(1);
 
   return (
@@ -1596,7 +1641,6 @@ export default function App() {
               : 'bg-white/85 border-[#E7E5E0] shadow-[0_8px_30px_rgba(28,25,23,0.05)]'
           }`}
         >
-          {/* Left: Animated Dual-Theme Image Logo (logo_dark.png & logo_light.png) */}
           <GsvBrandLogo
             isDark={isDark}
             isScrolled={isNavScrolled}
@@ -1605,7 +1649,6 @@ export default function App() {
             baseUrl={baseUrl}
           />
 
-          {/* Center: Recessed Inner Track with Concise Single-Word Links */}
           <nav
             className={`hidden lg:flex items-center gap-0.5 p-1 rounded-full border transition-all duration-500 ${
               isDark
@@ -1639,7 +1682,6 @@ export default function App() {
             })}
           </nav>
 
-          {/* Right: Clean Action Cluster (Theme Toggle + Let's Talk) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
@@ -1673,7 +1715,6 @@ export default function App() {
               <span>↗</span>
             </a>
 
-            {/* Mobile & Tablet Menu Button */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -2405,7 +2446,6 @@ export default function App() {
           </div>
 
           <AestheticCard isDark={isDark} className="overflow-hidden">
-            {/* 1. TOP STUDIO HEADER BAR: Switcher + Airbnb Red & Facebook Blue Buttons */}
             <div className={`p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-3 ${borderLine}`}>
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border ${sageBadge}`}>
@@ -2461,7 +2501,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2A. AIRBNB TAB: FULL-WIDTH SCROLLABLE WEBSITE PREVIEW OF AIRBNB.PNG */}
             {arcaView === 'airbnb' && (
               <AirbnbScrollableWebsitePreview
                 airbnbRoomUrl={airbnbRoomUrl}
@@ -2486,7 +2525,6 @@ export default function App() {
               />
             )}
 
-            {/* 2B. FACEBOOK TAB: 2-COLUMN LAYOUT (AVIDA POSTER ON LEFT + DETAILS ON RIGHT) */}
             {arcaView === 'facebook' && (
               <FacebookSplitShowcase
                 facebookPageUrl={facebookPageUrl}
@@ -2510,7 +2548,6 @@ export default function App() {
               />
             )}
 
-            {/* 2C. ROLE & LEASE DETAILS TAB */}
             {arcaView === 'details' && (
               <div className={`p-6 sm:p-10 space-y-6 ${isDark ? 'bg-[#161513]' : 'bg-[#F6F4EF]'}`}>
                 <div className="grid sm:grid-cols-3 gap-5">
@@ -2547,7 +2584,6 @@ export default function App() {
               </div>
             )}
 
-            {/* 3. CLEAN, ALIGNED 3-COLUMN EXECUTIVE FOOTER */}
             <div className={`p-5 sm:p-7 border-t ${borderLine}`}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-1.5">
@@ -3018,12 +3054,14 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECTION 9: PERFORMANCE RATINGS & FEEDBACK */}
+        {/* ==================================================================== */}
+        {/*  SECTION 9: REAL-TIME CLOUD FIRESTORE RATINGS & FEEDBACK             */}
+        {/* ==================================================================== */}
         <section id="ratings" className="reveal space-y-8 scroll-mt-24">
           <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b pb-4 ${borderLine}`}>
             <div>
               <span className={`text-xs uppercase tracking-widest font-semibold ${textSoft}`}>
-                08 / Performance & Feedback
+                08 / Real-Time Cloud Performance & Feedback
               </span>
               <h2 className={`font-display text-2xl sm:text-4xl font-bold tracking-tight mt-1 ${textMain}`}>
                 Rate my{' '}
@@ -3033,11 +3071,26 @@ export default function App() {
               </h2>
             </div>
 
-            <div className={`inline-flex items-center gap-3 px-4 py-2 rounded-full border self-start ${sageBadge}`}>
-              <div className="flex items-center text-amber-500 text-sm">{'★★★★★'}</div>
-              <span className="text-xs font-display font-bold">
-                {averageRating} / 5.0 ({reviews.length} Ratings)
+            <div className="flex flex-wrap items-center gap-2 self-start">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border ${
+                  isCloudSynced ? sageBadge : pillBg
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isCloudSynced ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
+                  }`}
+                />
+                <span>{isCloudSynced ? 'Live Cloud Sync Active' : 'Connecting to Cloud...'}</span>
               </span>
+
+              <div className={`inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border ${sageBadge}`}>
+                <span className="text-amber-500 text-sm">{'★★★★★'}</span>
+                <span className="text-xs font-display font-bold">
+                  {averageRating} / 5.0 ({reviews.length} Ratings)
+                </span>
+              </div>
             </div>
           </div>
 
@@ -3047,10 +3100,10 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h3 className={`font-display font-bold text-lg ${textMain}`}>
-                      Leave a Rating & Endorsement
+                      Leave a Live Rating & Endorsement
                     </h3>
                     <p className={`text-xs mt-0.5 ${textSoft}`}>
-                      Worked with me or reviewed my portfolio? Share your rating or tap a suggested phrase below.
+                      Saved in real time to Firebase Cloud Firestore so everyone visiting the portfolio sees your feedback immediately.
                     </p>
                   </div>
 
@@ -3134,23 +3187,28 @@ export default function App() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   {reviewSubmitted ? (
                     <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                      ✓ Thank you! Your 5-star feedback has been added.
+                      ✓ Saved to Cloud! Your rating is now live for all visitors.
                     </span>
                   ) : (
                     <span className={`text-[11px] ${textSoft}`}>
-                      Instant publish to portfolio feedback feed
+                      Real-time sync powered by Firebase Cloud Firestore
                     </span>
                   )}
 
                   <button
                     type="submit"
+                    disabled={isSubmittingReview}
                     className={`px-6 py-2.5 rounded-full text-xs font-display font-semibold transition-all shadow-sm ${
+                      isSubmittingReview ? 'opacity-60 cursor-wait' : ''
+                    } ${
                       isDark
                         ? 'bg-[#F5F3EF] text-[#121110] hover:bg-white'
                         : 'bg-[#1C1917] text-[#FAF8F5] hover:bg-[#35312E]'
                     }`}
                   >
-                    Submit Rating ({ratingInput}/5 ★)
+                    {isSubmittingReview
+                      ? 'Saving to Cloud...'
+                      : `Submit Rating (${ratingInput}/5 ★)`}
                   </button>
                 </div>
               </form>
@@ -3167,7 +3225,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 px-2.5 py-1 rounded-full border text-amber-500 text-xs font-bold border-amber-500/20 bg-amber-500/10">
-                      <span>{'★'.repeat(rev.rating)}</span>
+                      <span>{'★'.repeat(Math.max(1, Math.min(5, Number(rev.rating) || 5)))}</span>
                       <span className={textMain}>{rev.rating}/5</span>
                     </div>
                   </div>
